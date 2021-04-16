@@ -18,8 +18,8 @@ module sbe_gs
         real(8), allocatable :: omega(:, :, :)
         complex(8), allocatable :: p_matrix(:, :, :, :)
         complex(8), allocatable :: d_matrix(:, :, :, :)
-        complex(8), allocatable :: rv_matrix(:, :, :)
-        complex(8), allocatable :: prod_dk(:, :, :, :, :, :)
+        ! complex(8), allocatable :: rv_matrix(:, :, :)
+        ! complex(8), allocatable :: prod_dk(:, :, :, :, :, :)
 
         !k-space grid and geometry information
         !NOTE: prepred for uniformally distributed k-grid....
@@ -30,12 +30,12 @@ module sbe_gs
 contains
 
 
-subroutine init_sbe_gs(gs, sysname, directory, nkgrid, nb, ne, a1, a2, a3, read_bin)
+subroutine init_sbe_gs(gs, sysname, gs_directory, nkgrid, nb, ne, a1, a2, a3, read_bin)
     use salmon_file, only: open_filehandle, get_filehandle
     implicit none
     type(s_sbe_gs), intent(inout) :: gs
     character(*), intent(in) :: sysname
-    character(*), intent(in) :: directory
+    character(*), intent(in) :: gs_directory
     integer, intent(in) :: nkgrid(1:3)
     integer, intent(in) :: nb
     integer, intent(in) :: ne
@@ -60,8 +60,8 @@ subroutine init_sbe_gs(gs, sysname, directory, nkgrid, nb, ne, a1, a2, a3, read_
     allocate(gs%omega(1:nb, 1:nb, 1:nk))
     allocate(gs%p_matrix(1:nb, 1:nb, 1:3, 1:nk))
     allocate(gs%d_matrix(1:nb, 1:nb, 1:3, 1:nk))
-    allocate(gs%rv_matrix(1:nb, 1:nb, 1:nk))
-    allocate(gs%prod_dk(1:nb, 1:nb, -1:1, -1:1, -1:1, 1:nk))
+    ! allocate(gs%rv_matrix(1:nb, 1:nb, 1:nk))
+    ! allocate(gs%prod_dk(1:nb, 1:nb, -1:1, -1:1, -1:1, 1:nk))
 
     if (read_bin) then
         !Retrieve all data from binray
@@ -77,7 +77,6 @@ subroutine init_sbe_gs(gs, sysname, directory, nkgrid, nb, ne, a1, a2, a3, read_
         !Retrieve transition matrix from 'SYSNAME_tm.data':
         write(*,*) "read_tm_data"
         call read_tm_data()
-        write(*,*) "---"
         !Retrieve transition matrix from 'SYSNAME_tm.data':
         ! write(*,*) "read_prod_dk"
         ! call read_prod_dk()
@@ -136,7 +135,7 @@ contains
         integer :: fh, i, ik, iik
         real(8) :: tmp(4)
 
-        fh = open_filehandle(trim(directory) // trim(sysname) // '_k.data', 'old')
+        fh = open_filehandle(trim(gs_directory) // trim(sysname) // '_k.data', 'old')
         do i=1, 5
             read(fh, '(a)') dummy !Skip
         end do
@@ -157,7 +156,7 @@ contains
         integer :: fh, i, iik, iib, ib
         real(8) :: tmp
 
-        fh = open_filehandle(trim(directory) // trim(sysname) // '_eigen.data', 'old')
+        fh = open_filehandle(trim(gs_directory) // trim(sysname) // '_eigen.data', 'old')
         do i=1, 3
             read(fh, '(a)') dummy !Skip
         end do
@@ -182,7 +181,7 @@ contains
         integer :: fh, i, ik, ib, jb, iik, iib, jjb
         real(8) :: tmp(1:6)
 
-        fh = open_filehandle(trim(directory) // trim(sysname) // '_tm.data', 'old')
+        fh = open_filehandle(trim(gs_directory) // trim(sysname) // '_tm.data', 'old')
         do i=1, 3
             read(fh, '(a)') dummy !Skip
         end do
@@ -210,7 +209,7 @@ contains
     !     integer :: ik1, ik2, ik3, jk1, jk2, jk3, jjk
     !     real(8) :: tmp(1:6)
 
-    !     fh = open_filehandle(trim(directory) // trim(sysname) // '_prod_dk.data', 'old')
+    !     fh = open_filehandle(trim(gs_directory) // trim(sysname) // '_prod_dk.data', 'old')
     !     read(fh, '(a)') dummy !Skip
     !     do iik=1, nk
     !         do jjk=1, 3*3*3
@@ -235,7 +234,7 @@ contains
         integer :: fh
 
         fh = get_filehandle()
-        open(fh, file=trim(directory) // trim(sysname) // '_sbe_gs.bin', form='unformatted', status='old')
+        open(fh, file=trim(gs_directory) // trim(sysname) // '_sbe_gs.bin', form='unformatted', status='old')
         read(fh) gs%kvec
         read(fh) gs%kweight
         read(fh) gs%eigen
@@ -251,7 +250,7 @@ contains
         integer :: fh
 
         fh = get_filehandle()
-        open(fh, file=trim(directory) // trim(sysname) // '_sbe_gs.bin', form='unformatted', status='replace')
+        open(fh, file=trim(gs_directory) // trim(sysname) // '_sbe_gs.bin', form='unformatted', status='replace')
         write(fh) gs%kvec
         write(fh) gs%kweight
         write(fh) gs%eigen
@@ -275,7 +274,9 @@ contains
                     gs%omega(ib, jb, ik) = gs%eigen(ib, ik) - gs%eigen(jb, ik)
                     if (omega_eps < abs(gs%omega(ib, jb, ik))) then
                         gs%d_matrix(ib, jb, 1:3, ik) = &
-                            & zi * gs%p_matrix(ib, jb, 1:3, ik) / gs%omega(ib, jb, ik)
+                            & zi / gs%omega(ib, jb, ik) * ( &
+                            & gs%p_matrix(ib, jb, 1:3, ik) & 
+                            & )
                     else
                         gs%d_matrix(ib, jb, 1:3, ik) = 0d0
                     end if

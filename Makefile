@@ -9,7 +9,7 @@ io/salmon_file.o \
 common/structures.o \
 common/pack_unpack.o \
 sbe_gs.o \
-sbe_solver.o \
+sbe_bloch_solver.o \
 pulse.o \
 test.o \
 input_parameter.o \

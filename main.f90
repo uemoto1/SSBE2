@@ -14,45 +14,41 @@ program main
     call read_input()
 
     ! Read ground state electronic system:
-    call init_sbe_gs(gs, sysname, directory, &
-        & num_kgrid_gs, nstate, nelec, &
+    call init_sbe_gs(gs, sysname, gs_directory, &
+        & nkgrid, nstate, nelec, &
         & al_vec1, al_vec2, al_vec3, &
         & (read_sbe_gs_bin .eq. 'y'))
-    write(*,*) gs%nk, gs%nb, gs%ne
-    
-    ! call test_interp(gs); !stop
-        
+            
     ! Calculate dielectric spectra and save as SYSNAME_dielec.data:
-    if (out_dielec == 'y') then
-        call calc_dielec(trim(directory) // trim(sysname) // '_dielec.data', &
-            & gs, e_min_dielec, e_max_dielec, n_dielec, gamma_dielec)
+    if (trim(theory) == 'perturb_dielec') then
+        call calc_dielec(sysname, base_directory, gs, nenergy, de, gamma)
+        stop
     end if
 
-    stop
-
     ! Initialization of SBE solver and density matrix:
-    call init_sbe(sbe, gs, num_kgrid_sbe)
+    ! call init_sbe(sbe, gs, nkgrid)
+    stop
 
     write(*, '("#",99(1x,a))') "1:Step", "2:Time[au]", "3:Ac_x", "4:Ac_y", "5:Ac_z", &
         & "6:E_x", "7:E_y", "8:E_z", "9:Jmat_x", "10:Jmat_y", "11:Jmat_z", "12:n_v", "13:n_all" 
 
     ! Realtime calculation
-    do it = 1, nt
-        t = dt * it
-        call calc_cos2_pulse(t - dt * 0.5d0, pulse_tw1, &
-            & rlaser_int_wcm2_1, omega1, phi_cep1, epdir_re1, epdir_im1, &
-            & Ac, E)
-        call dt_evolve(sbe, gs, E, Ac, dt)
+    ! do it = 1, nt
+    !     t = dt * it
+    !     call calc_cos2_pulse(t - dt * 0.5d0, pulse_tw1, &
+    !         & rlaser_int_wcm2_1, omega1, phi_cep1, epdir_re1, epdir_im1, &
+    !         & Ac, E)
+    !     call dt_evolve(sbe, gs, E, Ac, dt)
 
-        if (mod(it, out_rt_step) == 0) then
-            call calc_cos2_pulse(t, pulse_tw1, &
-                & rlaser_int_wcm2_1, omega1, phi_cep1, epdir_re1, epdir_im1, &
-                & Ac, E)
-            call calc_current(sbe, gs, Ac, jmat)
-            write(*, '(i6,1x,f9.3,99(1x,es23.15e3))') &
-            & it, t, Ac, E, jmat, calc_trace(sbe, sbe%nb/2), calc_trace(sbe, sbe%nb)
-        end if
-    end do
+    !     if (mod(it, out_rt_step) == 0) then
+    !         call calc_cos2_pulse(t, pulse_tw1, &
+    !             & rlaser_int_wcm2_1, omega1, phi_cep1, epdir_re1, epdir_im1, &
+    !             & Ac, E)
+    !         call calc_current(sbe, gs, Ac, jmat)
+    !         write(*, '(i6,1x,f9.3,99(1x,es23.15e3))') &
+    !         & it, t, Ac, E, jmat, calc_trace(sbe, sbe%nb/2), calc_trace(sbe, sbe%nb)
+    !     end if
+    ! end do
 
     stop
 end program 

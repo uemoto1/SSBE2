@@ -3,30 +3,43 @@ module input_parameter
     use salmon_file, only: open_filehandle
     implicit none
 
-    character(64) :: directory
-    character(64) :: sysname
-    character(64) :: read_sbe_gs_bin
-    real(8) :: dt
-    integer :: nt
-    real(8) :: epdir_re1(1:3)
-    real(8) :: phi_cep1
-    real(8) :: rlaser_int_wcm2_1
-    real(8) :: pulse_tw1
-    real(8) :: omega1
-    real(8) :: epdir_im1(1:3)
-    real(8) :: al_vec3(1:3)
-    real(8) :: al_vec2(1:3)
-    real(8) :: al_vec1(1:3)
+    character(256) :: theory
+    character(256) :: sysname
+    character(256) :: base_directory
+    character(256) :: gs_directory
+    character(256) :: read_sbe_gs_bin
+    character(256) :: write_sbe_gs_bin
+    real(8), dimension(3) :: al_vec1
+    real(8), dimension(3) :: al_vec2
+    real(8), dimension(3) :: al_vec3
     integer :: nstate
     integer :: nelec
-    integer :: out_rt_step
-    integer :: n_dielec
-    character(1) :: out_dielec
-    real(8) :: e_max_dielec
-    real(8) :: gamma_dielec
-    real(8) :: e_min_dielec
-    integer :: num_kgrid_sbe(1:3)
-    integer :: num_kgrid_gs(1:3)
+    integer, dimension(3) :: nkgrid
+    integer :: nt
+    real(8) :: dt
+    real(8) :: e_impulse
+    character(256) :: ae_shape1
+    character(256) :: ae_shape2
+    real(8), dimension(3) :: epdir_re1
+    real(8), dimension(3) :: epdir_re2
+    real(8), dimension(3) :: epdir_im1
+    real(8), dimension(3) :: epdir_im2
+    real(8) :: phi_cep1
+    real(8) :: phi_cep2
+    real(8) :: E_amplitude1
+    real(8) :: E_amplitude2
+    real(8) :: I_wcm2_1
+    real(8) :: I_wcm2_2
+    real(8) :: tw1
+    real(8) :: tw2
+    real(8) :: omega1
+    real(8) :: omega2
+    real(8) :: t1_t2
+    real(8) :: t1_start
+    integer :: nenergy
+    real(8) :: de
+    real(8) :: gamma
+
 
 contains
 
@@ -35,61 +48,95 @@ contains
         integer :: ret, fh
         character(256) :: tmp
 
+        namelist/calculation/ &
+        & theory
+
         namelist/control/ &
-        & directory, &
         & sysname, &
-        & read_sbe_gs_bin
-        namelist/tgrid/ &
-        & dt, &
-        & nt
-        namelist/emfield/ &
-        & epdir_re1, &
-        & phi_cep1, &
-        & rlaser_int_wcm2_1, &
-        & pulse_tw1, &
-        & omega1, &
-        & epdir_im1
+        & base_directory, &
+        & gs_directory, &
+        & read_sbe_gs_bin, &
+        & write_sbe_gs_bin
+
         namelist/system/ &
-        & al_vec3, &
-        & al_vec2, &
         & al_vec1, &
+        & al_vec2, &
+        & al_vec3, &
         & nstate, &
         & nelec
-        namelist/analysis/ &
-        & out_rt_step, &
-        & n_dielec, &
-        & out_dielec, &
-        & e_max_dielec, &
-        & gamma_dielec, &
-        & e_min_dielec
-        namelist/kgrid/ &
-        & num_kgrid_sbe, &
-        & num_kgrid_gs
 
-        directory = './'
-        sysname = 'untitled'
+        namelist/kgrid/ &
+        & nkgrid
+
+        namelist/tgrid/ &
+        & nt, &
+        & dt
+
+        namelist/emfield/ &
+        & e_impulse, &
+        & ae_shape1, &
+        & ae_shape2, &
+        & epdir_re1, &
+        & epdir_re2, &
+        & epdir_im1, &
+        & epdir_im2, &
+        & phi_cep1, &
+        & phi_cep2, &
+        & E_amplitude1, &
+        & E_amplitude2, &
+        & I_wcm2_1, &
+        & I_wcm2_2, &
+        & tw1, &
+        & tw2, &
+        & omega1, &
+        & omega2, &
+        & t1_t2, &
+        & t1_start
+
+        namelist/analysis/ &
+        & nenergy, &
+        & de, &
+        & gamma
+
+
+
+        theory = 'perturb_dielec'
+        sysname = 'test'
+        base_directory = './'
+        gs_directory = './'
         read_sbe_gs_bin = 'n'
-        dt = 0.08
-        nt = 5000
-        epdir_re1 = (/0.0, 0.0, 1.0/)
-        phi_cep1 = 0.0
-        rlaser_int_wcm2_1 = 10000000000.0
-        pulse_tw1 = 413.5
-        omega1 = 0.05698
-        epdir_im1 = (/0.0, 0.0, 0.0/)
-        al_vec3 = 0.0
-        al_vec2 = 0.0
-        al_vec1 = 0.0
+        write_sbe_gs_bin = 'y'
+        al_vec1 = (/0.0, 0.0, 0.0/)
+        al_vec2 = (/0.0, 0.0, 0.0/)
+        al_vec3 = (/0.0, 0.0, 0.0/)
         nstate = 0
         nelec = 0
-        out_rt_step = 10
-        n_dielec = 1000
-        out_dielec = 'y'
-        e_max_dielec = 1.0
-        gamma_dielec = 0.005
-        e_min_dielec = 0.0
-        num_kgrid_sbe = 0
-        num_kgrid_gs = 0
+        nkgrid = (/0, 0, 0/)
+        nt = 1000
+        dt = 1.0d-2
+        e_impulse = 1.0d-2
+        ae_shape1 = 'none'
+        ae_shape2 = 'none'
+        epdir_re1 = (/0.0, 0.0, 0.0/)
+        epdir_re2 = (/0.0, 0.0, 0.0/)
+        epdir_im1 = (/0.0, 0.0, 0.0/)
+        epdir_im2 = (/0.0, 0.0, 0.0/)
+        phi_cep1 = 1.0d-2
+        phi_cep2 = 1.0d-2
+        E_amplitude1 = 1.0d-2
+        E_amplitude2 = 1.0d-2
+        I_wcm2_1 = 1.0d-2
+        I_wcm2_2 = 1.0d-2
+        tw1 = 1.0d-2
+        tw2 = 1.0d-2
+        omega1 = 1.0d-2
+        omega2 = 1.0d-2
+        t1_t2 = 1.0d-2
+        t1_start = 1.0d-2
+        nenergy = 1000
+        de = 1.0d-3
+        gamma = 1.0d-3
+
 
         fh = open_filehandle('.namelist.tmp')
         do while (.true.)
@@ -98,38 +145,60 @@ contains
             tmp = adjustl(tmp)
             if (tmp(1:1) .ne. '!') write(fh, '(a)') trim(tmp)
         end do
+        rewind(fh); read(fh, nml=calculation, iostat=ret)
         rewind(fh); read(fh, nml=control, iostat=ret)
+        rewind(fh); read(fh, nml=system, iostat=ret)
+        rewind(fh); read(fh, nml=kgrid, iostat=ret)
         rewind(fh); read(fh, nml=tgrid, iostat=ret)
         rewind(fh); read(fh, nml=emfield, iostat=ret)
-        rewind(fh); read(fh, nml=system, iostat=ret)
         rewind(fh); read(fh, nml=analysis, iostat=ret)
-        rewind(fh); read(fh, nml=kgrid, iostat=ret)
+
 
         close(fh)
 
-        write(*, '("# directory =",99(1x,a))') directory
-        write(*, '("# sysname =",99(1x,a))') sysname
-        write(*, '("# read_sbe_gs_bin =",99(1x,a))') read_sbe_gs_bin
-        write(*, '("# dt =",99(1x,es12.4e3))') dt
-        write(*, '("# nt =",99(1x,i7))') nt
-        write(*, '("# epdir_re1 =",99(1x,es12.4e3))') epdir_re1
-        write(*, '("# phi_cep1 =",99(1x,es12.4e3))') phi_cep1
-        write(*, '("# rlaser_int_wcm2_1 =",99(1x,es12.4e3))') rlaser_int_wcm2_1
-        write(*, '("# pulse_tw1 =",99(1x,es12.4e3))') pulse_tw1
-        write(*, '("# omega1 =",99(1x,es12.4e3))') omega1
-        write(*, '("# epdir_im1 =",99(1x,es12.4e3))') epdir_im1
-        write(*, '("# al_vec3 =",99(1x,es12.4e3))') al_vec3
-        write(*, '("# al_vec2 =",99(1x,es12.4e3))') al_vec2
-        write(*, '("# al_vec1 =",99(1x,es12.4e3))') al_vec1
-        write(*, '("# nstate =",99(1x,i7))') nstate
-        write(*, '("# nelec =",99(1x,i7))') nelec
-        write(*, '("# out_rt_step =",99(1x,i7))') out_rt_step
-        write(*, '("# n_dielec =",99(1x,i7))') n_dielec
-        write(*, '("# out_dielec =",99(1x,a))') out_dielec
-        write(*, '("# e_max_dielec =",99(1x,es12.4e3))') e_max_dielec
-        write(*, '("# gamma_dielec =",99(1x,es12.4e3))') gamma_dielec
-        write(*, '("# e_min_dielec =",99(1x,es12.4e3))') e_min_dielec
-        write(*, '("# num_kgrid_sbe =",99(1x,i7))') num_kgrid_sbe
-        write(*, '("# num_kgrid_gs =",99(1x,i7))') num_kgrid_gs
+        write(*, '(a)') '# calculation'
+        write(*, '(a, a)') '# theory=', trim(theory)
+        write(*, '(a)') '# control'
+        write(*, '(a, a)') '# sysname=', trim(sysname)
+        write(*, '(a, a)') '# base_directory=', trim(base_directory)
+        write(*, '(a, a)') '# gs_directory=', trim(gs_directory)
+        write(*, '(a, a)') '# read_sbe_gs_bin=', trim(read_sbe_gs_bin)
+        write(*, '(a, a)') '# write_sbe_gs_bin=', trim(write_sbe_gs_bin)
+        write(*, '(a)') '# system'
+        write(*, '(a, 9(es23.15e3))') '# al_vec1=', al_vec1
+        write(*, '(a, 9(es23.15e3))') '# al_vec2=', al_vec2
+        write(*, '(a, 9(es23.15e3))') '# al_vec3=', al_vec3
+        write(*, '(a, 9(i9))') '# nstate=', nstate
+        write(*, '(a, 9(i9))') '# nelec=', nelec
+        write(*, '(a)') '# kgrid'
+        write(*, '(a, 9(i9))') '# nkgrid=', nkgrid
+        write(*, '(a)') '# tgrid'
+        write(*, '(a, 9(i9))') '# nt=', nt
+        write(*, '(a, 9(es23.15e3))') '# dt=', dt
+        write(*, '(a)') '# emfield'
+        write(*, '(a, 9(es23.15e3))') '# e_impulse=', e_impulse
+        write(*, '(a, a)') '# ae_shape1=', trim(ae_shape1)
+        write(*, '(a, a)') '# ae_shape2=', trim(ae_shape2)
+        write(*, '(a, 9(es23.15e3))') '# epdir_re1=', epdir_re1
+        write(*, '(a, 9(es23.15e3))') '# epdir_re2=', epdir_re2
+        write(*, '(a, 9(es23.15e3))') '# epdir_im1=', epdir_im1
+        write(*, '(a, 9(es23.15e3))') '# epdir_im2=', epdir_im2
+        write(*, '(a, 9(es23.15e3))') '# phi_cep1=', phi_cep1
+        write(*, '(a, 9(es23.15e3))') '# phi_cep2=', phi_cep2
+        write(*, '(a, 9(es23.15e3))') '# E_amplitude1=', E_amplitude1
+        write(*, '(a, 9(es23.15e3))') '# E_amplitude2=', E_amplitude2
+        write(*, '(a, 9(es23.15e3))') '# I_wcm2_1=', I_wcm2_1
+        write(*, '(a, 9(es23.15e3))') '# I_wcm2_2=', I_wcm2_2
+        write(*, '(a, 9(es23.15e3))') '# tw1=', tw1
+        write(*, '(a, 9(es23.15e3))') '# tw2=', tw2
+        write(*, '(a, 9(es23.15e3))') '# omega1=', omega1
+        write(*, '(a, 9(es23.15e3))') '# omega2=', omega2
+        write(*, '(a, 9(es23.15e3))') '# t1_t2=', t1_t2
+        write(*, '(a, 9(es23.15e3))') '# t1_start=', t1_start
+        write(*, '(a)') '# analysis'
+        write(*, '(a, 9(i9))') '# nenergy=', nenergy
+        write(*, '(a, 9(es23.15e3))') '# de=', de
+        write(*, '(a, 9(es23.15e3))') '# gamma=', gamma
+
     end subroutine read_input
 end module input_parameter
