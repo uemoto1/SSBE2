@@ -27,6 +27,7 @@ input_parameter = [
             {"name": "al_vec3", "type": "real(8), dimension(3)", "default": "(/0.0, 0.0, 0.0/)"},
             {"name": "nstate", "type": "integer", "default": "0"},
             {"name": "nelec", "type": "integer", "default": "0"},
+            {"name": "nstate_sbe", "type": "integer", "default": "0"},
         ]
     },
     {

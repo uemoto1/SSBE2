@@ -40,7 +40,7 @@ subroutine calc_dielec(sysname, base_directory, gs, nenergy, de, gamma)
                                 eps = eps + 2 * (4.0 * pi) / (gs%volume * gs%nk) &
                                 & * gs%d_matrix(ib, jb, i, ik) &
                                 & * gs%d_matrix(jb, ib, j, ik) &
-                                & / (gs%omega(ib, jb, ik) - e - dcmplx(0d0, gamma)) 
+                                & / (gs%delta_omega(ib, jb, ik) - e - dcmplx(0d0, gamma)) 
                             end if
                         end do
                     end do

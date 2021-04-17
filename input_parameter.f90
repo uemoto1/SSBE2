@@ -14,6 +14,7 @@ module input_parameter
     real(8), dimension(3) :: al_vec3
     integer :: nstate
     integer :: nelec
+    integer :: nstate_sbe
     integer, dimension(3) :: nkgrid
     integer :: nt
     real(8) :: dt
@@ -63,7 +64,8 @@ contains
         & al_vec2, &
         & al_vec3, &
         & nstate, &
-        & nelec
+        & nelec, &
+        & nstate_sbe
 
         namelist/kgrid/ &
         & nkgrid
@@ -111,6 +113,7 @@ contains
         al_vec3 = (/0.0, 0.0, 0.0/)
         nstate = 0
         nelec = 0
+        nstate_sbe = 0
         nkgrid = (/0, 0, 0/)
         nt = 1000
         dt = 1.0d-2
@@ -170,6 +173,7 @@ contains
         write(*, '(a, 9(es23.15e3))') '# al_vec3=', al_vec3
         write(*, '(a, 9(i9))') '# nstate=', nstate
         write(*, '(a, 9(i9))') '# nelec=', nelec
+        write(*, '(a, 9(i9))') '# nstate_sbe=', nstate_sbe
         write(*, '(a)') '# kgrid'
         write(*, '(a, 9(i9))') '# nkgrid=', nkgrid
         write(*, '(a)') '# tgrid'

@@ -18,6 +18,7 @@ module salmon_math
   implicit none
 
   real(8),parameter :: Pi=3.141592653589793d0
+  complex(8),parameter :: zI = dcmplx(0.0d0, 1.0d0)
 
   public :: erf_salmon, &
             erfc_salmon, &

@@ -10,9 +10,9 @@ common/structures.o \
 common/pack_unpack.o \
 sbe_gs.o \
 sbe_bloch_solver.o \
-pulse.o \
 test.o \
 input_parameter.o \
+rt/em_field.o \
 main.o
 
 $(TARGET): $(OBJS)

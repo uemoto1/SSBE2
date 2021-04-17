@@ -15,7 +15,7 @@ module sbe_gs
         real(8), allocatable :: kvec(:, :), kweight(:)
         real(8), allocatable :: eigen(:, :)
         real(8), allocatable :: occup(:, :)
-        real(8), allocatable :: omega(:, :, :)
+        real(8), allocatable :: delta_omega(:, :, :)
         complex(8), allocatable :: p_matrix(:, :, :, :)
         complex(8), allocatable :: d_matrix(:, :, :, :)
         ! complex(8), allocatable :: rv_matrix(:, :, :)
@@ -57,7 +57,7 @@ subroutine init_sbe_gs(gs, sysname, gs_directory, nkgrid, nb, ne, a1, a2, a3, re
     allocate(gs%kweight(1:nk))
     allocate(gs%eigen(1:nb, 1:nk))
     allocate(gs%occup(1:nb, 1:nk))
-    allocate(gs%omega(1:nb, 1:nb, 1:nk))
+    allocate(gs%delta_omega(1:nb, 1:nb, 1:nk))
     allocate(gs%p_matrix(1:nb, 1:nb, 1:3, 1:nk))
     allocate(gs%d_matrix(1:nb, 1:nb, 1:3, 1:nk))
     ! allocate(gs%rv_matrix(1:nb, 1:nb, 1:nk))
@@ -65,32 +65,32 @@ subroutine init_sbe_gs(gs, sysname, gs_directory, nkgrid, nb, ne, a1, a2, a3, re
 
     if (read_bin) then
         !Retrieve all data from binray
-        write(*,*) "read_sbe_gs_bin"
+        write(*,*) "# read_sbe_gs_bin"
         call read_sbe_gs_bin()
     else
         !Retrieve eigenenergies from 'SYSNAME_eigen.data':
-        write(*,*) "read_eigen_data"
+        write(*,*) "# read_eigen_data"
         call read_eigen_data()
         !Retrieve k-points from 'SYSNAME_k.data':
-        write(*,*) "read_k_data"
+        write(*,*) "# read_k_data"
         call read_k_data()
         !Retrieve transition matrix from 'SYSNAME_tm.data':
-        write(*,*) "read_tm_data"
+        write(*,*) "# read_tm_data"
         call read_tm_data()
         !Retrieve transition matrix from 'SYSNAME_tm.data':
         ! write(*,*) "read_prod_dk"
         ! call read_prod_dk()
         !Export all data from binray
-        ! write(*,*) "save_sbe_gs_bin"
-        ! call save_sbe_gs_bin()
+        write(*,*) "# save_sbe_gs_bin"
+        call save_sbe_gs_bin()
     end if
 
     !Calculate iktbl_grid for uniform (non-symmetric) k-grid:
     ! write(*,*) "create_uniform_iktbl_grid"
     ! ! call create_uniform_iktbl_grid()
     !Calculate omega and d_matrix (neglecting diagonal part):
-    write(*,*) "create_omega_d"
-    call create_omega_d()
+    write(*,*) "# prepare_matrix"
+    call prepare_matrix()
 
     !Initial Occupation Number
     gs%occup(:,:) = 0d0 !!Experimental!!
@@ -263,7 +263,7 @@ contains
 
 
 
-    subroutine create_omega_d()
+    subroutine prepare_matrix()
         implicit none
         integer :: ik, ib, jb
         real(8), parameter :: omega_eps = 0.01
@@ -271,10 +271,10 @@ contains
         do ik=1, nk
             do ib=1, nb
                 do jb=1, nb
-                    gs%omega(ib, jb, ik) = gs%eigen(ib, ik) - gs%eigen(jb, ik)
-                    if (omega_eps < abs(gs%omega(ib, jb, ik))) then
+                    gs%delta_omega(ib, jb, ik) = gs%eigen(ib, ik) - gs%eigen(jb, ik)
+                    if (omega_eps < abs(gs%delta_omega(ib, jb, ik))) then
                         gs%d_matrix(ib, jb, 1:3, ik) = &
-                            & zi / gs%omega(ib, jb, ik) * ( &
+                            & zi / gs%delta_omega(ib, jb, ik) * ( &
                             & gs%p_matrix(ib, jb, 1:3, ik) & 
                             & )
                     else
@@ -283,7 +283,7 @@ contains
                 end do
             end do
         end do
-    end subroutine create_omega_d
+    end subroutine prepare_matrix
 
     
 end subroutine init_sbe_gs
