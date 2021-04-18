@@ -43,16 +43,18 @@ program main
 
     open(unit=999, file=trim(base_directory)//trim(sysname)//"_rt_energy.data")
     energy0 = calc_energy(sbe, gs, Ac_ext_t(:, 0))
+
     write(999, '(f12.6,2(es24.15e3))') 0.0d0, energy0, 0.0d0
 
     do it = 1, nt
         t = dt * it
         call dt_evolve_bloch(sbe, gs, Ac_ext_t(:, it), dt)
+        
         if (mod(it, 10) == 0) then
-            call calc_current_bloch(sbe, gs, Ac, Jmat)
+            call calc_current_bloch(sbe, gs, Ac_ext_t(:, it), Jmat)
             write(*, "(10(es24.15e3))") t, Ac_ext_t(:, it), &
             & - (Ac_ext_t(:, it+1)-Ac_ext_t(:, it-1)) / (2*dt), &
-            & jmat! calc_trace(sbe, gs, sbe%nb) , calc_trace(sbe, gs, sbe%nb/2)
+            & Jmat! calc_trace(sbe, gs, sbe%nb) , calc_trace(sbe, gs, sbe%nb/2)
         end if
 
         if (mod(it, 10) == 0) then
@@ -60,16 +62,6 @@ program main
             write(999, '(f12.6,2(es24.15e3))') t, energy, energy-energy0
         end if
 
-
-
-    !     if (mod(it, out_rt_step) == 0) then
-    !         call calc_cos2_pulse(t, pulse_tw1, &
-    !             & rlaser_int_wcm2_1, omega1, phi_cep1, epdir_re1, epdir_im1, &
-    !             & Ac, E)
-    !         call calc_current(sbe, gs, Ac, jmat)
-    !         write(*, '(i6,1x,f9.3,99(1x,es23.15e3))') &
-    !         & it, t, Ac, E, jmat, calc_trace(sbe, sbe%nb/2), calc_trace(sbe, sbe%nb)
-    !     end if
     end do
 
     close(999)

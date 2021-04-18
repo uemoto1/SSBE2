@@ -50,16 +50,28 @@ subroutine calc_current_bloch(sbe, gs, Ac, jmat)
 
     jtot(1:3) = 0d0
 
+    ! write(*, *) "LB1", LBOUND(gs%rvnl_matrix, 1)
+    ! write(*, *) "UB1", UBOUND(gs%rvnl_matrix, 1)
+    ! write(*, *) "LB2", LBOUND(gs%rvnl_matrix, 2)
+    ! write(*, *) "UB2", UBOUND(gs%rvnl_matrix, 2)
+    ! write(*, *) "LB3", LBOUND(gs%rvnl_matrix, 3)
+    ! write(*, *) "UB3", UBOUND(gs%rvnl_matrix, 3)
+    ! write(*, *) "LB4", LBOUND(gs%rvnl_matrix, 4)
+    ! write(*, *) "UB4", UBOUND(gs%rvnl_matrix, 4)
+
     !$omp parallel do default(shared) private(ik,ib,jb,idir) reduction(+:jtot)
     do ik=1, sbe%nk
         do idir=1, 3
             do jb=1, sbe%nb
                 do ib=1, sbe%nb
                     jtot(idir) = jtot(idir) + gs%kweight(ik) &
-                        & * real(sbe%rho(ib, jb, ik) * gs%p_matrix(jb, ib, idir, ik))
+                        & * real(sbe%rho(ib, jb, ik) * ( &
+                        & gs%p_matrix(jb, ib, idir, ik) &
+                        & - dcmplx(0.0d0, 1.0d0) * gs%rvnl_matrix(jb, ib, idir, ik) &
+                    & ))
                 end do
                 jtot(idir) = jtot(idir) + gs%kweight(ik) &
-                    * real(sbe%rho(jb, jb, ik)) * (gs%kvec(idir, ik) + Ac(idir))
+                   & * real(sbe%rho(jb, jb, ik)) * (gs%kvec(idir, ik) + Ac(idir))
             end do
         end do
     end do
@@ -114,9 +126,8 @@ contains
         implicit none
         complex(8), intent(in)     :: rho(nb, nb, nk)
         complex(8), intent(out)    :: hrho(nb, nb, nk)
-        integer :: ik, ib, jb, idir
-        real(8) :: ek(sbe%nb)
-        !$omp parallel do default(shared) private(ik,ib,jb,idir)
+        integer :: ik, idir
+        !$omp parallel do default(shared) private(ik,idir)
         do ik=1, nk
             hrho(1:nb, 1:nb, ik) = gs%delta_omega(1:nb, 1:nb, ik) * rho(1:nb, 1:nb, ik)
             !hrho = hrho + Ac(t) * (p * rho - rho * p)
