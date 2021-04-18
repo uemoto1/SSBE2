@@ -12,7 +12,7 @@ module sbe_gs
 
         !Ground state (GS) electronic system information
         integer :: nk, nb, ne
-        real(8), allocatable :: kvec(:, :), kweight(:)
+        real(8), allocatable :: kpoint(:, :), kweight(:)
         real(8), allocatable :: eigen(:, :)
         real(8), allocatable :: occup(:, :)
         real(8), allocatable :: delta_omega(:, :, :)
@@ -53,7 +53,7 @@ subroutine init_sbe_gs(gs, sysname, gs_directory, nkgrid, nb, ne, a1, a2, a3, re
     !Calculate b_matrix, volume_cell and volume_bz from a1..a3 vector.
     call calc_lattice_info()
 
-    allocate(gs%kvec(1:3, 1:nk))
+    allocate(gs%kpoint(1:3, 1:nk))
     allocate(gs%kweight(1:nk))
     allocate(gs%eigen(1:nb, 1:nk))
     allocate(gs%occup(1:nb, 1:nk))
@@ -136,7 +136,7 @@ contains
         do iik=1, nk
             read(fh, *) ik, tmp(1:4)
             if (ik .ne. iik) stop "ERROR! Invalid SYSNAME_k.data"
-            gs%kvec(1:3, ik) = tmp(1:3)
+            gs%kpoint(1:3, ik) = tmp(1:3)
             gs%kweight(ik) = tmp(4)
         end do !iik
         close(fh)
@@ -243,7 +243,7 @@ contains
 
         fh = get_filehandle()
         open(fh, file=trim(gs_directory) // trim(sysname) // '_sbe_gs.bin', form='unformatted', status='old')
-        read(fh) gs%kvec
+        read(fh) gs%kpoint
         read(fh) gs%kweight
         read(fh) gs%eigen
         read(fh) gs%p_matrix
@@ -260,7 +260,7 @@ contains
 
         fh = get_filehandle()
         open(fh, file=trim(gs_directory) // trim(sysname) // '_sbe_gs.bin', form='unformatted', status='replace')
-        write(fh) gs%kvec
+        write(fh) gs%kpoint
         write(fh) gs%kweight
         write(fh) gs%eigen
         write(fh) gs%p_matrix

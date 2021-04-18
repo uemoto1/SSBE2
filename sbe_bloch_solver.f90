@@ -71,7 +71,7 @@ subroutine calc_current_bloch(sbe, gs, Ac, jmat)
                     & ))
                 end do
                 jtot(idir) = jtot(idir) + gs%kweight(ik) &
-                   & * real(sbe%rho(jb, jb, ik)) * (gs%kvec(idir, ik) + Ac(idir))
+                   & * real(sbe%rho(jb, jb, ik)) * (gs%kpoint(idir, ik) + Ac(idir))
             end do
         end do
     end do
@@ -179,16 +179,26 @@ function calc_energy(sbe, gs, Ac) result(energy)
     type(s_sbe_bloch_solver), intent(in) :: sbe
     type(s_sbe_gs), intent(in) :: gs
     real(8), intent(in) :: Ac(1:3)
-    integer :: ik, ib
+    integer :: ik, ib, jb, idir
     real(8) :: energy
+    real(8) :: kvec(1:3)
     energy = 0d0
-    !$omp parallel do default(shared) private(ik, ib) reduction(+: energy)
+    !$omp parallel do default(shared) private(ik, ib, jb, idir) reduction(+: energy)
     do ik = 1, sbe%nk
+        ! kvec(1:3) = gs%kpoint(1, ik) * gs%b_matrix(1, 1:3) &
+        !     & + gs%kpoint(2, ik) * gs%b_matrix(2, 1:3) &
+        !     & + gs%kpoint(3, ik) * gs%b_matrix(3, 1:3)
         do ib = 1, sbe%nb
+            do idir = 1, 3
+                do jb = 1, sbe%nb
+                    energy = energy &
+                        & + Ac(idir) * real(sbe%rho(ib, jb, ik) * gs%p_matrix(jb, ib, idir, ik)) * gs%kweight(ik)
+                end do
+            end do
             energy = energy &
                 & + real(sbe%rho(ib, ib, ik)) * ( &
                 & + gs%eigen(ib, ik) &
-                & + dot_product(gs%kvec(:, ik), Ac(:)) &
+                !& + dot_product(kvec(:), Ac(:))
                 & + 0.5 * dot_product(Ac, Ac) &
                 & ) * gs%kweight(ik)
         end do

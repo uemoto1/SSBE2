@@ -46,25 +46,25 @@ input_parameter = [
     {
         "name": "emfield",
         "variables": [
-            {"name": "e_impulse", "type": "real(8)", "default": "1.0d-2"},
+            {"name": "e_impulse", "type": "real(8)", "default": "0.0d0"},
             {"name": "ae_shape1", "type": "character(256)", "default": "'none'"},
             {"name": "ae_shape2", "type": "character(256)", "default": "'none'"},
             {"name": "epdir_re1", "type": "real(8), dimension(3)", "default": "(/0.0, 0.0, 0.0/)"},
             {"name": "epdir_re2", "type": "real(8), dimension(3)", "default": "(/0.0, 0.0, 0.0/)"},
             {"name": "epdir_im1", "type": "real(8), dimension(3)", "default": "(/0.0, 0.0, 0.0/)"},
             {"name": "epdir_im2", "type": "real(8), dimension(3)", "default": "(/0.0, 0.0, 0.0/)"},
-            {"name": "phi_cep1", "type": "real(8)", "default": "1.0d-2"},
-            {"name": "phi_cep2", "type": "real(8)", "default": "1.0d-2"},
-            {"name": "E_amplitude1", "type": "real(8)", "default": "1.0d-2"},
-            {"name": "E_amplitude2", "type": "real(8)", "default": "1.0d-2"},
-            {"name": "I_wcm2_1", "type": "real(8)", "default": "1.0d-2"},
-            {"name": "I_wcm2_2", "type": "real(8)", "default": "1.0d-2"},
-            {"name": "tw1", "type": "real(8)", "default": "1.0d-2"},
-            {"name": "tw2", "type": "real(8)", "default": "1.0d-2"},
-            {"name": "omega1", "type": "real(8)", "default": "1.0d-2"},
-            {"name": "omega2", "type": "real(8)", "default": "1.0d-2"},
-            {"name": "t1_t2", "type": "real(8)", "default": "1.0d-2"},
-            {"name": "t1_start", "type": "real(8)", "default": "1.0d-2"},
+            {"name": "phi_cep1", "type": "real(8)", "default": "0.0d0"},
+            {"name": "phi_cep2", "type": "real(8)", "default": "0.0d0"},
+            {"name": "E_amplitude1", "type": "real(8)", "default": "0.0d0"},
+            {"name": "E_amplitude2", "type": "real(8)", "default": "0.0d0"},
+            {"name": "I_wcm2_1", "type": "real(8)", "default": "0.0d0"},
+            {"name": "I_wcm2_2", "type": "real(8)", "default": "0.0d0"},
+            {"name": "tw1", "type": "real(8)", "default": "0.0d0"},
+            {"name": "tw2", "type": "real(8)", "default": "0.0d0"},
+            {"name": "omega1", "type": "real(8)", "default": "0.0d0"},
+            {"name": "omega2", "type": "real(8)", "default": "0.0d0"},
+            {"name": "t1_t2", "type": "real(8)", "default": "0.0d0"},
+            {"name": "t1_start", "type": "real(8)", "default": "0.0d0"},
         ]
     },
     {
@@ -72,7 +72,7 @@ input_parameter = [
         "variables": [
             {"name": "nenergy", "type": "integer", "default": "1000"},
             {"name": "de", "type": "real(8)", "default": "1.0d-3"},
-            {"name": "gamma", "type": "real(8)", "default": "1.0d-3"},
+            {"name": "gamma", "type": "real(8)", "default": "5.0d-3"},
         ]
     },
 ]
