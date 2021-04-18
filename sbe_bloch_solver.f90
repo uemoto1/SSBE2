@@ -46,38 +46,28 @@ subroutine calc_current_bloch(sbe, gs, Ac, jmat)
     real(8), intent(in) :: Ac(1:3)
     real(8), intent(out) :: jmat(1:3)
     integer :: ik, idir, ib, jb
-    real(8) :: jtot(1:3)
+    complex(8) :: jtmp(1:3)
+    complex(8), parameter :: zI = dcmplx(0.0d0, 1.0d0)
 
-    jtot(1:3) = 0d0
+    jtmp(1:3) = 0d0
 
-    ! write(*, *) "LB1", LBOUND(gs%rvnl_matrix, 1)
-    ! write(*, *) "UB1", UBOUND(gs%rvnl_matrix, 1)
-    ! write(*, *) "LB2", LBOUND(gs%rvnl_matrix, 2)
-    ! write(*, *) "UB2", UBOUND(gs%rvnl_matrix, 2)
-    ! write(*, *) "LB3", LBOUND(gs%rvnl_matrix, 3)
-    ! write(*, *) "UB3", UBOUND(gs%rvnl_matrix, 3)
-    ! write(*, *) "LB4", LBOUND(gs%rvnl_matrix, 4)
-    ! write(*, *) "UB4", UBOUND(gs%rvnl_matrix, 4)
-
-    !$omp parallel do default(shared) private(ik,ib,jb,idir) reduction(+:jtot)
+    !$omp parallel do default(shared) private(ik,ib,jb,idir) reduction(+:jtmp)
     do ik=1, sbe%nk
-        do idir=1, 3
-            do jb=1, sbe%nb
-                do ib=1, sbe%nb
-                    jtot(idir) = jtot(idir) + gs%kweight(ik) &
-                        & * real(sbe%rho(ib, jb, ik) * ( &
-                        & gs%p_matrix(jb, ib, idir, ik) &
-                        & - dcmplx(0.0d0, 1.0d0) * gs%rvnl_matrix(jb, ib, idir, ik) &
-                    & ))
+        do idir = 1, 3
+            do ib = 1, sbe%nb
+                do jb = 1, sbe%nb
+                    jtmp(idir) = jtmp(idir) + gs%kweight(ik) * sbe%rho(jb, ib, ik) * ( &
+                        & gs%p_matrix(ib, jb, idir, ik) &!- zI * gs%rvnl_matrix(ib, jb, idir, ik) &
+                        & )
                 end do
-                jtot(idir) = jtot(idir) + gs%kweight(ik) &
-                   & * real(sbe%rho(jb, jb, ik)) * (gs%kpoint(idir, ik) + Ac(idir))
             end do
         end do
     end do
     !$omp end parallel do
-    jmat(:) =  jtot(:) / sum(gs%kweight) / gs%volume
-
+    jtmp(1:3) = jtmp(1:3) / sum(gs%kweight(:))
+    
+    jmat(:) = (real(jtmp(:)) + Ac * calc_trace(sbe, gs, sbe%nb)) / gs%volume    
+    !jmat(1:3) = (real(jtmp(1:3))) / gs%volume    
     return
 end subroutine calc_current_bloch
 
@@ -181,7 +171,7 @@ function calc_energy(sbe, gs, Ac) result(energy)
     real(8), intent(in) :: Ac(1:3)
     integer :: ik, ib, jb, idir
     real(8) :: energy
-    real(8) :: kvec(1:3)
+    ! real(8) :: kvec(1:3)
     energy = 0d0
     !$omp parallel do default(shared) private(ik, ib, jb, idir) reduction(+: energy)
     do ik = 1, sbe%nk

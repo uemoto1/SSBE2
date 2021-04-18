@@ -9,6 +9,7 @@ module input_parameter
     character(256) :: gs_directory
     character(256) :: read_sbe_gs_bin
     character(256) :: write_sbe_gs_bin
+    real(8), dimension(3) :: al
     real(8), dimension(3) :: al_vec1
     real(8), dimension(3) :: al_vec2
     real(8), dimension(3) :: al_vec3
@@ -60,6 +61,7 @@ contains
         & write_sbe_gs_bin
 
         namelist/system/ &
+        & al, &
         & al_vec1, &
         & al_vec2, &
         & al_vec3, &
@@ -108,6 +110,7 @@ contains
         gs_directory = './'
         read_sbe_gs_bin = 'n'
         write_sbe_gs_bin = 'y'
+        al = (/0.0, 0.0, 0.0/)
         al_vec1 = (/0.0, 0.0, 0.0/)
         al_vec2 = (/0.0, 0.0, 0.0/)
         al_vec3 = (/0.0, 0.0, 0.0/)
@@ -168,6 +171,7 @@ contains
         write(*, '(a, a)') '# read_sbe_gs_bin=', trim(read_sbe_gs_bin)
         write(*, '(a, a)') '# write_sbe_gs_bin=', trim(write_sbe_gs_bin)
         write(*, '(a)') '# system'
+        write(*, '(a, 9(es23.15e3))') '# al=', al
         write(*, '(a, 9(es23.15e3))') '# al_vec1=', al_vec1
         write(*, '(a, 9(es23.15e3))') '# al_vec2=', al_vec2
         write(*, '(a, 9(es23.15e3))') '# al_vec3=', al_vec3

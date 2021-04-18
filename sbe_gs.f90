@@ -209,34 +209,6 @@ contains
     end subroutine read_tm_data
 
 
-    ! Read band interconnection from SALMON's output file
-    ! subroutine read_prod_dk()
-    !     implicit none
-    !     character(256) :: dummy
-    !     integer :: fh, i, ik, ib, jb, iik, iib, jjb
-    !     integer :: ik1, ik2, ik3, jk1, jk2, jk3, jjk
-    !     real(8) :: tmp(1:6)
-
-    !     fh = open_filehandle(trim(gs_directory) // trim(sysname) // '_prod_dk.data', 'old')
-    !     read(fh, '(a)') dummy !Skip
-    !     do iik=1, nk
-    !         do jjk=1, 3*3*3
-    !             do jjb=1, nb
-    !                 do iib=1, nb
-    !                     read(fh, *) ik, ik1, ik2, ik3, & 
-    !                         & jk1, jk2, jk3, ib, jb, tmp(1:2)
-    !                     if ((ik .ne. iik) .or. (ib .ne. iib) .or. (jb .ne. jjb)) &
-    !                         stop "ERROR! Invalid SYSNAME_prod_dk.data"
-    !                     gs%prod_dk(ib, jb, jk1, jk2, jk3, ik) = &
-    !                         & dcmplx(tmp(1), tmp(2))
-    !                 end do
-    !             end do
-    !         end do
-    !     end do
-    !     close(fh)
-    ! end subroutine read_prod_dk
-
-
     subroutine read_sbe_gs_bin()
         implicit none
         integer :: fh
@@ -283,8 +255,11 @@ contains
                 do jb=1, nb
                     gs%delta_omega(ib, jb, ik) = gs%eigen(ib, ik) - gs%eigen(jb, ik)
                     if (omega_eps < abs(gs%delta_omega(ib, jb, ik))) then
+                        ! gs%d_matrix(ib, jb, 1:3, ik) = &
+                        !     & (zi * gs%p_matrix(ib, jb, 1:3, ik) - gs%rvnl_matrix(ib, jb, 1:3, ik)) &
+                        !     & / gs%delta_omega(ib, jb, ik)  
                         gs%d_matrix(ib, jb, 1:3, ik) = &
-                            & (zi * gs%p_matrix(ib, jb, 1:3, ik) - gs%rvnl_matrix(ib, jb, 1:3, ik)) &
+                            & (zi * gs%p_matrix(ib, jb, 1:3, ik)) &
                             & / gs%delta_omega(ib, jb, ik)  
                     else
                         gs%d_matrix(ib, jb, 1:3, ik) = 0d0

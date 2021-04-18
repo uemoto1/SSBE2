@@ -16,6 +16,11 @@ program main
 
     call read_input()
 
+    if (0.0d0 < al(1)) al_vec1(1:3) = (/ al(1), 0.0d0, 0.0d0 /)
+    if (0.0d0 < al(2)) al_vec2(1:3) = (/ 0.0d0, al(2), 0.0d0 /)
+    if (0.0d0 < al(3)) al_vec3(1:3) = (/ 0.0d0, 0.0d0, al(3) /)
+    if (nstate_sbe < 1) nstate_sbe = nstate
+
     ! Read ground state electronic system:
     call init_sbe_gs(gs, sysname, gs_directory, &
         & nkgrid, nstate, nelec, &
@@ -23,12 +28,11 @@ program main
         & (read_sbe_gs_bin .eq. 'y'))
 
     ! Calculate dielectric spectra and save as SYSNAME_dielec.data:
-    if (trim(theory) == 'perturb_dielec') then
+    if (trim(theory) == 'lr_dielec') then
         call calc_dielec(sysname, base_directory, gs, nenergy, de, gamma)
         stop
     end if
 
-    if (nstate_sbe < 1) nstate_sbe = nstate
 
     ! Initialization of SBE solver and density matrix:
     call init_sbe(sbe, gs, nstate_sbe)
@@ -38,13 +42,17 @@ program main
     call calc_Ac_ext_t(0.0d0, dt, 0, nt, Ac_ext_t)
 
     ! Realtime calculation
-    open(unit=100, file=trim(base_directory)//trim(sysname)//"_rt.data")
+    open(unit=100, file=trim(base_directory)//trim(sysname)//"_sbe_rt.data")
     write(100, '(4a)') "# 1:Time[a.u.] 2:Ac_ext_x[a.u.] 3:Ac_ext_y[a.u.] 4:Ac_ext_z[a.u.] ", &
         & "5:E_ext_x[a.u.] 6:E_ext_y[a.u.] 7:E_ext_z[a.u.] 8:Ac_tot_x[a.u.] ", &
         & "9:Ac_tot_y[a.u.] 10:Ac_tot_z[a.u.] 11:E_tot_x[a.u.] 12:E_tot_y[a.u.] ", &
         & "13:E_tot_z[a.u.]  14:Jm_x[a.u.] 15:Jm_y[a.u.] 16:Jm_z[a.u.]"
-    open(unit=101, file=trim(base_directory)//trim(sysname)//"_rt_energy.data")
+
+    open(unit=101, file=trim(base_directory)//trim(sysname)//"_sbe_rt_energy.data")
     write(101, '(a)') "# 1:Time[a.u.] 2:Eall[a.u.] 3:Eall-Eall0[a.u.]"
+
+    open(unit=102, file=trim(base_directory)//trim(sysname)//"_sbe_nex.data")
+    write(102, '(a)') "# 1:Time[a.u.] 2:nelec[a.u.] 3:nhole[a.u.]"
 
     energy0 = calc_energy(sbe, gs, Ac_ext_t(:, 0))
     write(101, '(f12.6,2(es24.15e3))') 0.0d0, energy0, 0.0d0
@@ -63,13 +71,18 @@ program main
 
             tr_all = calc_trace(sbe, gs, nstate_sbe)
             tr_vb = calc_trace(sbe, gs, nelec / 2)
-            write(*, '(f12.6,2(es24.15e3))') t, tr_all, tr_vb
+            write(102, '(f12.6,2(es24.15e3))') t, tr_all - tr_vb, nelec - tr_vb 
+            
+            write(*, '(f12.6,es24.15e3)') t, tr_all
         end if
 
     end do
 
     close(100)
     close(101)
+    close(102)
+
+    write(*, '(a)') "Bye!"
 
     stop
 end program 

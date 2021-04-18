@@ -22,6 +22,7 @@ input_parameter = [
     {
         "name": "system",
         "variables": [
+            {"name": "al", "type": "real(8), dimension(3)", "default": "(/0.0, 0.0, 0.0/)"},
             {"name": "al_vec1", "type": "real(8), dimension(3)", "default": "(/0.0, 0.0, 0.0/)"},
             {"name": "al_vec2", "type": "real(8), dimension(3)", "default": "(/0.0, 0.0, 0.0/)"},
             {"name": "al_vec3", "type": "real(8), dimension(3)", "default": "(/0.0, 0.0, 0.0/)"},
