@@ -1,0 +1,4 @@
+FC = mpifrtpx
+FLAGS = -cpp -Kopenmp -Cpp -Kocl -Nlst=t -Koptmsg=2 -Ncheck_std=03s -Kfast
+LIBS = -SSL2BLAMP
+
