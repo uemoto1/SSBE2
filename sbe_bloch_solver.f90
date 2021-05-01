@@ -57,7 +57,7 @@ subroutine calc_current_bloch(sbe, gs, Ac, jmat)
             do ib = 1, sbe%nb
                 do jb = 1, sbe%nb
                     jtmp(idir) = jtmp(idir) + gs%kweight(ik) * sbe%rho(jb, ib, ik) * ( &
-                        & gs%p_matrix(ib, jb, idir, ik) & !- zI * gs%rvnl_matrix(ib, jb, idir, ik) &
+                        & gs%p_matrix(ib, jb, idir, ik) & !+ zI * gs%rvnl_matrix(ib, jb, idir, ik) &
                         & )
                 end do
             end do
