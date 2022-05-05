@@ -1,0 +1,20 @@
+&calculation
+    theory = "sbe"
+/
+
+&control
+    sysname = "Si"
+    base_directory_gs = "003_elk"
+/
+
+&system
+    al(1:3) = 10.26, 10.26, 10.26
+    nstate_gs = 49
+    nstate_rt = 32
+/
+
+&kgrid
+    num_kgrid(1:3) = 8, 8, 8
+/
+
+

@@ -5,17 +5,17 @@ module input_parameter
 
     character(256) :: theory
     character(256) :: sysname
-    character(256) :: base_directory
-    character(256) :: gs_directory
-    character(256) :: read_sbe_gs_bin
-    character(256) :: write_sbe_gs_bin
+    character(256) :: base_directory_gs
+    ! character(256) :: gs_directory
+    ! character(256) :: read_sbe_gs_bin
+    ! character(256) :: write_sbe_gs_bin
     real(8), dimension(3) :: al
-    real(8), dimension(3) :: al_vec1
-    real(8), dimension(3) :: al_vec2
-    real(8), dimension(3) :: al_vec3
-    integer :: nstate
-    integer :: nelec
-    integer :: nstate_sbe
+    ! real(8), dimension(3) :: al_vec1
+    ! real(8), dimension(3) :: al_vec2
+    ! real(8), dimension(3) :: al_vec3
+    integer :: nstate_gs
+    ! integer :: nelec
+    integer :: nstate_rt
     integer, dimension(3) :: nkgrid
     integer :: nt
     real(8) :: dt
@@ -55,19 +55,19 @@ contains
 
         namelist/control/ &
         & sysname, &
-        & base_directory, &
-        & gs_directory, &
-        & read_sbe_gs_bin, &
-        & write_sbe_gs_bin
+        & base_directory_gs
+        ! & gs_directory, &
+        ! & read_sbe_gs_bin, &
+        ! & write_sbe_gs_bin
 
         namelist/system/ &
         & al, &
-        & al_vec1, &
-        & al_vec2, &
-        & al_vec3, &
-        & nstate, &
-        & nelec, &
-        & nstate_sbe
+        ! & al_vec1, &
+        ! & al_vec2, &
+        ! & al_vec3, &
+        & nstate_gs, &
+        ! & nelec, &
+        & nstate_rt
 
         namelist/kgrid/ &
         & nkgrid
@@ -106,17 +106,17 @@ contains
 
         theory = 'perturb_dielec'
         sysname = 'test'
-        base_directory = './'
-        gs_directory = './'
-        read_sbe_gs_bin = 'n'
-        write_sbe_gs_bin = 'y'
+        base_directory_gs = './'
+        ! gs_directory = './'
+        ! read_sbe_gs_bin = 'n'
+        ! write_sbe_gs_bin = 'y'
         al = (/0.0, 0.0, 0.0/)
-        al_vec1 = (/0.0, 0.0, 0.0/)
-        al_vec2 = (/0.0, 0.0, 0.0/)
-        al_vec3 = (/0.0, 0.0, 0.0/)
-        nstate = 0
-        nelec = 0
-        nstate_sbe = 0
+        ! al_vec1 = (/0.0, 0.0, 0.0/)
+        ! al_vec2 = (/0.0, 0.0, 0.0/)
+        ! al_vec3 = (/0.0, 0.0, 0.0/)
+        nstate_gs = 0
+        ! nelec = 0
+        nstate_rt = 0
         nkgrid = (/0, 0, 0/)
         nt = 1000
         dt = 1.0d-2
@@ -166,18 +166,18 @@ contains
         write(*, '(a, a)') '# theory=', trim(theory)
         write(*, '(a)') '# control'
         write(*, '(a, a)') '# sysname=', trim(sysname)
-        write(*, '(a, a)') '# base_directory=', trim(base_directory)
-        write(*, '(a, a)') '# gs_directory=', trim(gs_directory)
-        write(*, '(a, a)') '# read_sbe_gs_bin=', trim(read_sbe_gs_bin)
-        write(*, '(a, a)') '# write_sbe_gs_bin=', trim(write_sbe_gs_bin)
+        write(*, '(a, a)') '# base_directory_gs=', trim(base_directory_gs)
+        ! write(*, '(a, a)') '# gs_directory=', trim(gs_directory)
+        ! write(*, '(a, a)') '# read_sbe_gs_bin=', trim(read_sbe_gs_bin)
+        ! write(*, '(a, a)') '# write_sbe_gs_bin=', trim(write_sbe_gs_bin)
         write(*, '(a)') '# system'
         write(*, '(a, 9(es23.15e3))') '# al=', al
-        write(*, '(a, 9(es23.15e3))') '# al_vec1=', al_vec1
-        write(*, '(a, 9(es23.15e3))') '# al_vec2=', al_vec2
-        write(*, '(a, 9(es23.15e3))') '# al_vec3=', al_vec3
-        write(*, '(a, 9(i9))') '# nstate=', nstate
-        write(*, '(a, 9(i9))') '# nelec=', nelec
-        write(*, '(a, 9(i9))') '# nstate_sbe=', nstate_sbe
+        ! write(*, '(a, 9(es23.15e3))') '# al_vec1=', al_vec1
+        ! write(*, '(a, 9(es23.15e3))') '# al_vec2=', al_vec2
+        ! write(*, '(a, 9(es23.15e3))') '# al_vec3=', al_vec3
+        write(*, '(a, 9(i9))') '# nstate_gs=', nstate_gs
+        ! write(*, '(a, 9(i9))') '# nelec=', nelec
+        write(*, '(a, 9(i9))') '# nstate_rt=', nstate_rt
         write(*, '(a)') '# kgrid'
         write(*, '(a, 9(i9))') '# nkgrid=', nkgrid
         write(*, '(a)') '# tgrid'

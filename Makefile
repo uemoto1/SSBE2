@@ -1,4 +1,4 @@
-include Makefile.inc
+include make.inc
 
 TARGET = SSBE 
 
@@ -13,6 +13,7 @@ sbe_bloch_solver.o \
 test.o \
 input_parameter.o \
 rt/em_field.o \
+ground_state.o \
 main.o
 
 $(TARGET): $(OBJS)
@@ -30,5 +31,3 @@ all: $(TARGET)
 clean:
 	rm $(TARGET) $(OBJS) *.mod
 
-input_parameter.f90: input_parameter.py
-	python input_parameter.py > $@
