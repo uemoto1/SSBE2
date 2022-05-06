@@ -87,7 +87,7 @@ real(8) function calc_total(rt, gs)
     implicit none
     type(rt_data), intent(in) :: rt
     type(gs_data), intent(in) :: gs
-    integer :: ik, i
+    integer :: ik, ib
     real(8) :: tmp
     tmp = 0.0d0
     !$omp parallel do default(shared) private(ik, ib) reduction(+:tmp)
