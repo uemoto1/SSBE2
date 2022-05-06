@@ -52,6 +52,7 @@ subroutine calc_drho(drho, rho, Ac)
     complex(8), intent(in) :: rho(rt%nstate, rt%nstate, rt%nk)
     real(8), intent(in) :: Ac(3)
     integer :: i, j, l, n, ik
+    real(8) :: t
     
     write(999, *) "Stage1"
     flush(999)
@@ -77,7 +78,7 @@ subroutine calc_drho(drho, rho, Ac)
     !         write(*,*) 4; flush(0)
             do i = 1, rt%nstate
     !             write(*,*) 5; flush(0)
-                drho(i, j, ik) = 1.0d0
+                t = 1.0d0
 
                 do n = 1, 3
     !                 write(*,*) 6; flush(0)
