@@ -63,7 +63,7 @@ subroutine calc_drho_k(drho_k, rho_k, e_k, p_k, rvnl_k, Ac)
 
     do j = 1, rt%nstate
         do i = 1, rt%nstate
-            drho_k(i, j) = dcmplx(0.0, 1.0) * (e_k(i) - e_k(j)) * rho_k(i, j)
+            drho_k(i, j) = dcmplx(0.0, -1.0) * (e_k(i) - e_k(j)) * rho_k(i, j)
             do n = 1, 3
                 do l = 1, rt%nstate
                     drho_k(i, j) = drho_k(i, j) + dcmplx(0.0, -1.0) * Ac(n) * ( &
