@@ -32,9 +32,11 @@ subroutine dt_evolve_bloch(rt, gs, dt, Ac0, Ac1)
     type(rt_data), intent(inout) :: rt
     type(gs_data), intent(in) :: gs
     real(8), intent(in) :: dt, Ac0(3), Ac1(3)
+    complex(8) :: rho_k_tmp(rt%nstate, rt%nstate)
     complex(8) :: drho_k1(rt%nstate, rt%nstate)
-    complex(8) :: rho_k2(rt%nstate, rt%nstate)
     complex(8) :: drho_k2(rt%nstate, rt%nstate)
+    complex(8) :: drho_k3(rt%nstate, rt%nstate)
+    complex(8) :: drho_k4(rt%nstate, rt%nstate)
     ! allocate(drho1(rt%nstate, rt%nstate, rt%nk))
     integer :: ik
 
@@ -42,10 +44,17 @@ subroutine dt_evolve_bloch(rt, gs, dt, Ac0, Ac1)
     do ik = 1, rt%nk
         call calc_drho_k(drho_k1, rt%rho(:, :, ik), &
             & gs%eigen(:, ik), gs%pmatrix(:, :, :, ik), gs%rvnl(:, :, :, ik), Ac0)
-        rho_k2 = rt%rho(:, :, ik) + dt * drho_k1
-        call calc_drho_k(drho_k2, rho_k2, &
-            & gs%eigen(:, ik), gs%pmatrix(:, :, :, ik), gs%rvnl(:, :, :, ik), Ac1)
-        rt%rho(:, :, ik) = rt%rho(:, :, ik) + 0.5 * dt * (drho_k1 + drho_k2)
+        rho_k_tmp = rt%rho(:, :, ik) + 0.5 * dt * drho_k1
+        call calc_drho_k(drho_k2, rho_k_tmp, &
+            & gs%eigen(:, ik), gs%pmatrix(:, :, :, ik), gs%rvnl(:, :, :, ik), 0.5*(Ac0+Ac1))
+        rho_k_tmp = rt%rho(:, :, ik) + 0.5 * dt * drho_k2
+        call calc_drho_k(drho_k1, rho_k_tmp, &
+            & gs%eigen(:, ik), gs%pmatrix(:, :, :, ik), gs%rvnl(:, :, :, ik), 0.5*(Ac0+Ac1))
+        rho_k_tmp = rt%rho(:, :, ik) + dt * drho_k3
+        call calc_drho_k(drho_k1, rho_k_tmp, &
+            & gs%eigen(:, ik), gs%pmatrix(:, :, :, ik), gs%rvnl(:, :, :, ik), Ac1))
+        rt%rho(:, :, ik) = rt%rho(:, :, ik) &
+            & + (dt/6) * (drho_k1(:, :) + 2*drho_k2(:, :) + 2*drho_k3(:, :) + drho_k4(:, :))
     end do
     !$omp end parallel do
 
