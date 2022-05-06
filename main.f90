@@ -3,9 +3,12 @@ program main
     ! use sbe_solver
     use input_parameter
     use ground_state
+    use time_evolution
     ! use test
     ! use em_field
     implicit none
+
+    integer :: i
 
     ! type(s_sbe_bloch_solver) :: sbe
     ! type(s_sbe_gs) :: gs
@@ -15,11 +18,21 @@ program main
     ! real(8) :: energy0, energy
     ! real(8) :: tr_all, tr_vb
 
-    type(ground_state_info) :: gs
+    type(gs_data) :: gs
+    type(rt_data) :: rt
 
     call read_input()
 
+    write(*, "(a)") "# --- load_elk_data"; flush(0)
     call load_elk_data(gs, nkgrid(1)*nkgrid(2)*nkgrid(3),  nstate_gs, base_directory_gs)
+
+    write(*, "(a)") "# --- init_bloch"; flush(0)
+    call init_bloch(rt, gs)
+    do i = 1, 1000
+        write(*, "(a)") "# --- dt_evolve_bloch"; flush(0)
+        call dt_evolve_bloch(rt, gs, dt, (/ 0.0d0, 0.0d0, 0.0d0 /))
+        write(*, *) calc_total(rt, gs)
+    end do
 
     ! if (0.0d0 < al(1)) al_vec1(1:3) = (/ al(1), 0.0d0, 0.0d0 /)
     ! if (0.0d0 < al(2)) al_vec2(1:3) = (/ 0.0d0, al(2), 0.0d0 /)

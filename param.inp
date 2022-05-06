@@ -14,7 +14,7 @@
 /
 
 &kgrid
-    num_kgrid(1:3) = 8, 8, 8
+    nkgrid(1:3) = 8, 8, 8
 /
 
 

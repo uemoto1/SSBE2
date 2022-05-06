@@ -3,18 +3,21 @@ include make.inc
 TARGET = SSBE 
 
 OBJS = \
-misc/unusedvar.o \
-math/salmon_math.o \
+math_constants.o \
 io/salmon_file.o \
-common/structures.o \
-common/pack_unpack.o \
-sbe_gs.o \
-sbe_bloch_solver.o \
-test.o \
 input_parameter.o \
-rt/em_field.o \
+em_field.o \
 ground_state.o \
+time_evolution.o \
 main.o
+
+# misc/unusedvar.o \
+# common/structures.o \
+# common/pack_unpack.o \
+# sbe_gs.o \
+# sbe_bloch_solver.o \
+# test.o \
+
 
 $(TARGET): $(OBJS)
 	$(FC) -o $@ $^ $(FLAGS) $(LIBS)
