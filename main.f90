@@ -41,7 +41,7 @@ program main
     do i = 1, nt
         call dt_evolve_bloch(rt, gs, dt, Ac_ext(:, i-1), Ac_ext(:, i))
         call current(jcur, qtot, rt, gs, Ac_ext(:, i))
-        write(*, "(f12.6,99es25.15e4)") i*dt, Ac_ext(:, i), jcur(:), qtot
+        write(*, "(f12.6,99es25.15e4)") i*dt, Ac_ext(:, i), jcur(:), qtot, calc_total(rt, gs)
     end do
     stop "Good bye"
     ! if (0.0d0 < al(1)) al_vec1(1:3) = (/ al(1), 0.0d0, 0.0d0 /)

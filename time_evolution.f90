@@ -117,7 +117,7 @@ real(8) function calc_total(rt, gs)
     !$omp parallel do default(shared) private(ik,ib) reduction(+:tmp)
     do ik = 1, rt%nk
         do ib = 1, rt%nstate
-            tmp = tmp + gs%kweight(ik) * real(rt%rho(ib, ib, ik))
+            tmp = tmp + gs%kweight(ik) * gs%eigen(ib, ik) * real(rt%rho(ib, ib, ik))
         end do
     end do
     !$omp end parallel do
