@@ -51,7 +51,7 @@ subroutine calc_drho(drho, rho, Ac)
     integer :: i, j, l, n, ik
     
     drho(:, :, :) = 0.0d0
-    !$omp parallel do default(shared) private(ik,n,i,j,l) collapse(3)
+    !!$omp parallel do default(shared) private(ik,n,i,j,l) collapse(3)
     do ik = 1, rt%nk
         do i = 1, rt%nstate
             do j = 1, rt%nstate
@@ -65,7 +65,7 @@ subroutine calc_drho(drho, rho, Ac)
             end do
         end do
     end do
-    !$omp end parallel do
+    !!$omp end parallel do
     return
 end subroutine calc_drho
 end subroutine dt_evolve_bloch
