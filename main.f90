@@ -42,7 +42,7 @@ program main
         write(*, "(a)") "# CALL dt_evolve_bloch"; flush(6)
         call dt_evolve_bloch(rt, gs, dt, Ac_ext(:, i-1), Ac_ext(:, i))
         write(*,*) -3; flush(6)
-        stop
+        stop "SC"
         write(*, "(f12.6,99es25.15e4)") i*dt, Ac_ext(:, i), calc_total(rt, gs)
         ! write(*, "(a)") "# --- dt_evolve_bloch"; flush(0)
         ! call dt_evolve_bloch(rt, gs, dt, Ac_ext(:, i-1), Ac_ext(:, i))

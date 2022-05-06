@@ -77,10 +77,10 @@ subroutine calc_drho(drho, rho, Ac)
     !                 write(*,*) 6; flush(0)
                     do l = 1, rt%nstate
                         ! write(*,*) 7; flush(0)
-                        drho(i, j, ik) = drho(i, j, ik) + dcmplx(0.0, -1.0) * Ac(n) &
-                        & * ((gs%pmatrix(i, l, n, ik) + gs%rvnl(i, l, n, ik)) * rho(l, j, ik) &
-                        & -  rho(i, l, ik) * (gs%pmatrix(l, j, n, ik) + gs%rvnl(l, j, n, ik)))
-    !                     write(*,*) 8; flush(0)
+                        drho(i, j, ik) = drho(i, j, ik) + dcmplx(0.0, -1.0) * Ac(n) !&
+                        !& * ((gs%pmatrix(i, l, n, ik) + gs%rvnl(i, l, n, ik)) * rho(l, j, ik) &
+                        !& -  rho(i, l, ik) * (gs%pmatrix(l, j, n, ik) + gs%rvnl(l, j, n, ik)))
+    !                   !  write(*,*) 8; flush(0)
                     end do
                 end do
             end do
