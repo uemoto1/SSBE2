@@ -36,15 +36,11 @@ program main
 
     write(*, "(a)") "# CALL: calc_Ac_ext_t"; flush(0)
     call calc_Ac_ext_t(0.0d0, dt, 0, nt, Ac_ext)
-    write(*,*) "AFTER calc_Ac_ext_t"; flush(6)
     
     do i = 1, nt
         write(*, "(a)") "# CALL dt_evolve_bloch"; flush(6)
         call dt_evolve_bloch(rt, gs, dt, Ac_ext(:, i-1), Ac_ext(:, i))
         write(*, "(f12.6,99es25.15e4)") i*dt, Ac_ext(:, i), calc_total(rt, gs)
-        ! write(*, "(a)") "# --- dt_evolve_bloch"; flush(0)
-        ! call dt_evolve_bloch(rt, gs, dt, Ac_ext(:, i-1), Ac_ext(:, i))
-        ! write(*, "(f12.6,99es25.15e4)") i*dt, Ac_ext(:, i)
     end do
     stop "Good bye"
     ! if (0.0d0 < al(1)) al_vec1(1:3) = (/ al(1), 0.0d0, 0.0d0 /)
