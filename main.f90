@@ -39,7 +39,6 @@ program main
     call calc_Ac_ext_t(0.0d0, dt, 0, nt, Ac_ext)
     
     do i = 1, nt
-        write(*, "(a)") "# CALL dt_evolve_bloch"; flush(6)
         call dt_evolve_bloch(rt, gs, dt, Ac_ext(:, i-1), Ac_ext(:, i))
         call current(jcur, rt, gs, Ac_ext(:, i))
         write(*, "(f12.6,99es25.15e4)") i*dt, Ac_ext(:, i), jcur(:)

@@ -88,7 +88,7 @@ subroutine current(jcur, rt, gs, Ac)
     integer :: ik, ib, jb
 
     jcur(:) = 0.0d0
-
+    !$omp parallel do default(shared) private(ik,ib,jb) reduction(+:jcur) collapse(3)
     do ik = 1, rt%nk
         do ib = 1, rt%nstate
             do jb = 1, rt%nstate
@@ -100,6 +100,7 @@ subroutine current(jcur, rt, gs, Ac)
             end do
         end do
     end do
+    !$omp end parallel do
     return
 end subroutine
     
