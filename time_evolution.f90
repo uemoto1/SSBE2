@@ -38,6 +38,7 @@ subroutine dt_evolve_bloch(rt, gs, dt, Ac0, Ac1)
 
     ! Modified Euler
     write(*,*) -1; flush(0)
+    stop
     call calc_drho(drho1, rt%rho, Ac0)
     write(*,*) -2; flush(0)
     rho2 = rt%rho + dt * drho1
