@@ -39,7 +39,7 @@ subroutine dt_evolve_bloch(rt, gs, dt, Ac0, Ac1)
      ! Modified Euler
      write(*,*) "START"; flush(6)
      stop "Hey!"
-!     call calc_drho(drho1, rt%rho, Ac0)
+    call calc_drho(drho1, rt%rho, Ac0)
 !     write(*,*) -2; flush(0)
 !     rho2 = rt%rho + dt * drho1
 !     call calc_drho(drho2, rho2, Ac0)
@@ -53,9 +53,9 @@ subroutine calc_drho(drho, rho, Ac)
     real(8), intent(in) :: Ac(3)
     integer :: i, j, l, n, ik
     
-    write(*,*) 1; flush(0)
+    write(*,*) "calc_drho1"; flush(6)
     drho(:, :, :) = 0.0d0
-    write(*,*) 2; flush(0)
+    write(*,*) "calc_drho1"; flush(6)
     !!$omp parallel do default(shared) private(ik,n,i,j,l) collapse(3)
     do ik = 1, rt%nk
         write(*,*) 3; flush(0)
