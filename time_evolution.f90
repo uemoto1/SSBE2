@@ -44,41 +44,41 @@ subroutine dt_evolve_bloch(rt, gs, dt, Ac0, Ac1)
 !     rho2 = rt%rho + dt * drho1
 !     call calc_drho(drho2, rho2, Ac0)
 !     rt%rho = rt%rho + 0.5d0 * dt * (drho1 + drho2)
-! contains
+contains
 
-! subroutine calc_drho(drho, rho, Ac)
-!     implicit none
-!     complex(8), intent(out) :: drho(rt%nstate, rt%nstate, rt%nk)
-!     complex(8), intent(in) :: rho(rt%nstate, rt%nstate, rt%nk)
-!     real(8), intent(in) :: Ac(3)
-!     integer :: i, j, l, n, ik
+subroutine calc_drho(drho, rho, Ac)
+    implicit none
+    complex(8), intent(out) :: drho(rt%nstate, rt%nstate, rt%nk)
+    complex(8), intent(in) :: rho(rt%nstate, rt%nstate, rt%nk)
+    real(8), intent(in) :: Ac(3)
+    integer :: i, j, l, n, ik
     
-!     write(*,*) 1; flush(0)
-!     drho(:, :, :) = 0.0d0
-!     write(*,*) 2; flush(0)
-!     !!$omp parallel do default(shared) private(ik,n,i,j,l) collapse(3)
-!     do ik = 1, rt%nk
-!         write(*,*) 3; flush(0)
-!         do i = 1, rt%nstate
-!             write(*,*) 4; flush(0)
-!             do j = 1, rt%nstate
-!                 write(*,*) 5; flush(0)
-!                 do n = 1, 3
-!                     write(*,*) 6; flush(0)
-!                     do l = 1, rt%nstate
-!                         write(*,*) 7; flush(0)
-!                         drho(i, j, ik) = drho(i, j, ik) + dcmplx(0.0, -1.0) * Ac(n) &
-!                         & * ((gs%pmatrix(i, l, n, ik) + gs%rvnl(i, l, n, ik)) * rho(l, j, ik) &
-!                         & -  rho(i, l, ik) * (gs%pmatrix(l, j, n, ik) + gs%rvnl(l, j, n, ik)))
-!                         write(*,*) 8; flush(0)
-!                     end do
-!                 end do
-!             end do
-!         end do
-!     end do
-!     !!$omp end parallel do
-!     return
-! end subroutine calc_drho
+    write(*,*) 1; flush(0)
+    drho(:, :, :) = 0.0d0
+    write(*,*) 2; flush(0)
+    !!$omp parallel do default(shared) private(ik,n,i,j,l) collapse(3)
+    do ik = 1, rt%nk
+        write(*,*) 3; flush(0)
+        do i = 1, rt%nstate
+            write(*,*) 4; flush(0)
+            do j = 1, rt%nstate
+                write(*,*) 5; flush(0)
+                do n = 1, 3
+                    write(*,*) 6; flush(0)
+                    do l = 1, rt%nstate
+                        write(*,*) 7; flush(0)
+                        drho(i, j, ik) = drho(i, j, ik) + dcmplx(0.0, -1.0) * Ac(n) &
+                        & * ((gs%pmatrix(i, l, n, ik) + gs%rvnl(i, l, n, ik)) * rho(l, j, ik) &
+                        & -  rho(i, l, ik) * (gs%pmatrix(l, j, n, ik) + gs%rvnl(l, j, n, ik)))
+                        write(*,*) 8; flush(0)
+                    end do
+                end do
+            end do
+        end do
+    end do
+    !!$omp end parallel do
+    return
+end subroutine calc_drho
 end subroutine dt_evolve_bloch
 
 
