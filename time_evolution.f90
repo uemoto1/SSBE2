@@ -88,16 +88,15 @@ subroutine current(jcur, rt, gs, Ac)
     integer :: ik, ib, jb
 
     jcur(:) = 0.0d0
-    !$omp parallel do default(shared) private(ik,ib,jb) reduction(+:jcur) collapse(3)
+    !$omp parallel do default(shared) private(ik,ib,jb) reduction(+:jcur) collapse(2)
     do ik = 1, rt%nk
         do ib = 1, rt%nstate
             do jb = 1, rt%nstate
                 jcur(:) = jcur(:) + (gs%kweight(ik) / gs%volume) * real( &
                     & gs%pmatrix(ib, jb, :, ik) * rt%rho(jb, ib, ik) &
-                    & + gs%rvnl(ib, jb, :, ik) * rt%rho(jb, ib, ik) &
-                    & + Ac(:) * rt%rho(ib, ib, ik) &
-                    & )
+                    & + gs%rvnl(ib, jb, :, ik) * rt%rho(jb, ib, ik))
             end do
+            jcur(:) = jcur(:) + Ac(:) * (gs%kweight(ik) / gs%volume) * real(rt%rho(ib, ib, ik))
         end do
     end do
     !$omp end parallel do
