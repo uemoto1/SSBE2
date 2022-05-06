@@ -82,6 +82,30 @@ subroutine calc_drho_k(drho_k, rho_k, p_k, rvnl_k, Ac)
 end subroutine calc_drho_k
 end subroutine dt_evolve_bloch
 
+subroutine current(jcur, rt, gs, Ac)
+    implicit none
+    real(8), intent(out) :: jcur(3)
+    type(rt_data), intent(in) :: rt
+    type(gs_data), intent(in) :: gs
+    real(8), intent(in) :: Ac
+    integer :: ik, ib, jb
+
+    jcur(:) = 0.0d0
+
+    do ik = 1, rt%nk
+        do ib = 1, rt%nstate
+            do jb = 1, rt%nstate
+                jcur(:) = jcur(:) + gs%kweight(ik) * ( &
+                    & gs%pmatrix(ib, jb, :, ik) * rt%rho(jb, ib, ik) &
+                    & + gs%rvnl(ib, jb, :, ik) * rt%rho(jb, ib, ik) &
+                    & + Ac(:) * rt%rho(ib, ib, ik) &
+                    & )
+            end do
+        end do
+    end do
+    return
+end subroutine
+    
 
 real(8) function calc_total(rt, gs)
     implicit none
