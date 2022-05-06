@@ -41,7 +41,6 @@ subroutine dt_evolve_bloch(rt, gs, dt, Ac0, Ac1)
     rho2 = rt%rho + dt * drho1
     call calc_drho(drho2, rho2, Ac0)
     rt%rho = rt%rho + 0.5d0 * dt * (drho1 + drho2)
-
 contains
 
 subroutine calc_drho(drho, rho, Ac)
