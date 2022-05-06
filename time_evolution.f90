@@ -87,7 +87,7 @@ subroutine current(jcur, rt, gs, Ac)
     real(8), intent(out) :: jcur(3)
     type(rt_data), intent(in) :: rt
     type(gs_data), intent(in) :: gs
-    real(8), intent(in) :: Ac
+    real(8), intent(in) :: Ac(3)
     integer :: ik, ib, jb
 
     jcur(:) = 0.0d0
