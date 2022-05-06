@@ -37,9 +37,18 @@ subroutine dt_evolve_bloch(rt, gs, dt, Ac0, Ac1)
     complex(8) :: drho2(rt%nstate, rt%nstate, rt%nk)
 
      ! Modified Euler
-     write(*,*) "START"; flush(6)
-     call calc_drho(drho1, rt%rho, Ac0)
+     write(*,*) "START"; 
+     write(*,*) shape(drho1, 1)
+     write(*,*) shape(drho1, 2)
+     write(*,*) shape(drho1, 3)
+     write(*,*) shape(rt%rho, 1)
+     write(*,*) shape(rt%rho, 2)
+     write(*,*) shape(rt%rho, 3)
+     
+     flush(6)
      stop "Hey!"
+
+     call calc_drho(drho1, rt%rho, Ac0)
 !     write(*,*) -2; flush(0)
 !     rho2 = rt%rho + dt * drho1
 !     call calc_drho(drho2, rho2, Ac0)
