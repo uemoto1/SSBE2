@@ -56,6 +56,7 @@ subroutine calc_drho(drho, rho, Ac)
     write(*,*) "calc_drho1"; flush(6)
     drho(:, :, :) = 0.0d0
     write(*,*) "calc_drho1"; flush(6)
+    stop "HEYHEY"
     !!$omp parallel do default(shared) private(ik,n,i,j,l) collapse(3)
     do ik = 1, rt%nk
         write(*,*) 3; flush(0)
