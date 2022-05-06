@@ -49,11 +49,6 @@ subroutine dt_evolve_bloch(rt, gs, dt, Ac0, Ac1)
     end do
     !$omp end parallel do
 
-
-!     write(*,*) -2; flush(0)
-!     rho2 = rt%rho + dt * drho1
-!     call calc_drho(drho2, rho2, Ac0)
-!     rt%rho = rt%rho + 0.5d0 * dt * (drho1 + drho2)
 contains
 
 subroutine calc_drho_k(drho_k, rho_k, p_k, rvnl_k, Ac)
@@ -66,6 +61,7 @@ subroutine calc_drho_k(drho_k, rho_k, p_k, rvnl_k, Ac)
     integer :: i, j, l, n
     real(8) :: t
 
+    !$omp parallel do default(shared) private(i,j) collapse(2)
     do j = 1, rt%nstate
         do i = 1, rt%nstate
             drho_k(i, j) = 0.0d0
@@ -78,6 +74,7 @@ subroutine calc_drho_k(drho_k, rho_k, p_k, rvnl_k, Ac)
             end do
         end do
     end do
+    !$omp end parallel do
     
 end subroutine calc_drho_k
 end subroutine dt_evolve_bloch
@@ -124,9 +121,5 @@ real(8) function calc_total(rt, gs)
     calc_total = tmp
     return
 end function
-                
-
-
-
 
 end module time_evolution
