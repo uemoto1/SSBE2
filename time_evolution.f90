@@ -79,21 +79,21 @@ subroutine calc_drho_k(drho_k, rho_k, e_k, p_k, rvnl_k, Ac)
 end subroutine calc_drho_k
 end subroutine dt_evolve_bloch
 
-subroutine current(jcur, qele, rt, gs, Ac)
+subroutine current(jcur, qtot, rt, gs, Ac)
     implicit none
     real(8), intent(out) :: jcur(3)
-    real(8), intent(out) :: qele
+    real(8), intent(out) :: qtot
     type(rt_data), intent(in) :: rt
     type(gs_data), intent(in) :: gs
     real(8), intent(in) :: Ac(3)
     integer :: ik, ib, jb
 
     jcur(:) = 0.0d0
-    qele = 0.0d0
-    !$omp parallel do default(shared) private(ik,ib,jb) reduction(+:jcur) collapse(2)
+    qtot = 0.0d0
+    !$omp parallel do default(shared) private(ik,ib,jb) reduction(+:qtot,jcur) collapse(2)
     do ik = 1, rt%nk
         do ib = 1, rt%nstate
-            qele = qele + gs%kweight(ik) * real(rt%rho(ib, ib, ik))
+            qtot = qtot + gs%kweight(ik) * real(rt%rho(ib, ib, ik))
             jcur(:) = jcur(:) + (gs%kweight(ik) / gs%volume) * Ac(:) * real(rt%rho(ib, ib, ik))
             do jb = 1, rt%nstate
                 jcur(:) = jcur(:) + (gs%kweight(ik) / gs%volume) * real( &
