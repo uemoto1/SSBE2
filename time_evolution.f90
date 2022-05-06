@@ -82,20 +82,20 @@ subroutine dt_evolve_bloch(rt, gs, dt, Ac0, Ac1)
 ! end subroutine dt_evolve_bloch
 
 
-! real(8) function calc_total(rt, gs)
-!     implicit none
-!     type(rt_data), intent(in) :: rt
-!     type(gs_data), intent(in) :: gs
-!     integer :: ik, i
+real(8) function calc_total(rt, gs)
+    implicit none
+    type(rt_data), intent(in) :: rt
+    type(gs_data), intent(in) :: gs
+    integer :: ik, i
 
-!     calc_total = 0.0d0
-!     do ik = 1, rt%nk
-!         do i = 1, rt%nstate
-!             calc_total = calc_total + gs%kweight(ik) * real(rt%rho(i, i, ik))
-!         end do
-!     end do
-!     return
-! end function
+    calc_total = 0.0d0
+    do ik = 1, rt%nk
+        do i = 1, rt%nstate
+            calc_total = calc_total + gs%kweight(ik) * real(rt%rho(i, i, ik))
+        end do
+    end do
+    return
+end function
                 
 
 
