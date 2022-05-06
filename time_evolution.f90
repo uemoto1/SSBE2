@@ -57,10 +57,15 @@ subroutine calc_drho(drho, rho, Ac)
     flush(999)
 
     drho(:, :, :) = 0.0d0
-    write(999,*) "BOUNDS", lbound(drho, 1), ubound(drho, 1)
-    write(999,*) "BOUNDS", lbound(drho, 2), ubound(drho, 2)
-    write(999,*) "BOUNDS", lbound(drho, 3), ubound(drho, 3)
+    write(999,*) "lbound(drho, 1), ubound(drho, 1)", lbound(drho, 1), ubound(drho, 1)
+    write(999,*) "lbound(drho, 2), ubound(drho, 2)", lbound(drho, 2), ubound(drho, 2)
+    write(999,*) "lbound(drho, 3), ubound(drho, 3)", lbound(drho, 3), ubound(drho, 3)
     flush(999)
+    write(999,*) "lbound(Ac, 1), ubound(Ac, 1)", lbound(Ac, 1), ubound(Ac, 1)
+    flush(999)
+    write(999,*) "Ac", Ac
+    flush(999)
+
 
     ! stop "HEYHEY"
     !!$omp parallel do default(shared) private(ik,n,i,j,l) collapse(3)
