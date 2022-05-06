@@ -60,7 +60,7 @@ subroutine calc_drho(drho, rho, Ac)
     complex(8), intent(out) :: drho(rt%nstate, rt%nstate, rt%nk)
     complex(8), intent(in) :: rho(rt%nstate, rt%nstate, rt%nk)
     real(8), intent(in) :: Ac(3)
-    ! integer :: i, j, l, n, ik
+    integer :: i, j, l, n, ik
     
     write(*,*) "calc_drho1"; flush(6)
     drho(:, :, :) = 0.0d0
