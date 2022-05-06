@@ -67,8 +67,8 @@ subroutine calc_drho(drho, rho, Ac)
     write(*,*) "calc_drho1"; flush(6)
     ! stop "HEYHEY"
     ! !!$omp parallel do default(shared) private(ik,n,i,j,l) collapse(3)
-    ! do ik = 1, rt%nk
-    !     write(*,*) 3; flush(0)
+    do ik = 1, rt%nk
+        write(*,*) 3; flush(6)
     !     do i = 1, rt%nstate
     !         write(*,*) 4; flush(0)
     !         do j = 1, rt%nstate
@@ -85,9 +85,8 @@ subroutine calc_drho(drho, rho, Ac)
     !             end do
     !         end do
     !     end do
-    ! end do
+    end do
     ! !!$omp end parallel do
-    ! return
 end subroutine calc_drho
 end subroutine dt_evolve_bloch
 
