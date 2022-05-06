@@ -61,10 +61,9 @@ subroutine calc_drho_k(drho_k, rho_k, e_k, p_k, rvnl_k, Ac)
     real(8), intent(in) :: Ac(3)
     integer :: i, j, l, n
 
-    !$omp parallel do default(shared) private(i,j) collapse(2)
     do j = 1, rt%nstate
         do i = 1, rt%nstate
-            drho_k(i, j) = dcmplx(0.0, -1.0) * (e_k(i) - e_k(j)) * rho_k(i, j)
+            drho_k(i, j) = dcmplx(0.0, 1.0) * (e_k(i) - e_k(j)) * rho_k(i, j)
             do n = 1, 3
                 do l = 1, rt%nstate
                     drho_k(i, j) = drho_k(i, j) + dcmplx(0.0, -1.0) * Ac(n) * ( &
@@ -74,7 +73,6 @@ subroutine calc_drho_k(drho_k, rho_k, e_k, p_k, rvnl_k, Ac)
             end do
         end do
     end do
-    !$omp end parallel do
     
 end subroutine calc_drho_k
 end subroutine dt_evolve_bloch
