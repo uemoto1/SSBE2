@@ -33,18 +33,20 @@ subroutine dt_evolve_bloch(rt, gs, dt, Ac0, Ac1)
     type(gs_data), intent(in) :: gs
     real(8), intent(in) :: dt, Ac0(3), Ac1(3)
     complex(8) :: drho_k1(rt%nstate, rt%nstate)
-    ! complex(8) :: rho_k2(rt%nstate, rt%nstate)
-    ! complex(8) :: drho_k2(rt%nstate, rt%nstate)
+    complex(8) :: rho_k2(rt%nstate, rt%nstate)
+    complex(8) :: drho_k2(rt%nstate, rt%nstate)
     ! allocate(drho1(rt%nstate, rt%nstate, rt%nk))
     integer :: ik
 
     do ik = 1, rt%nk
         call calc_drho_k(drho_k1, rt%rho(:, :, ik), &
             & gs%pmatrix(:, :, :, ik), gs%rvnl(:, :, :, ik), Ac0)
+        rho_k2 = rt%rho(:, :, ik) + dt * drho_k1
+        call calc_drho_k(drho_k2, rho_k2, &
+            & gs%pmatrix(:, :, :, ik), gs%rvnl(:, :, :, ik), Ac1)
+        rt%rho(:, :, ik) = rt%rho(:, :, ik) + 0.5 * dt * (drho_k1 + drho_k2)
     end do
 
-     ! Modified Euler
-     stop "Hey!"
 
 !     write(*,*) -2; flush(0)
 !     rho2 = rt%rho + dt * drho1
@@ -62,6 +64,7 @@ subroutine calc_drho_k(drho_k, rho_k, p_k, rvnl_k, Ac)
     integer :: i, j, l, n
     real(8) :: t
 
+    !!!$omp parallel do collapse(2) default(share) private(i, j)
     do j = 1, rt%nstate
         do i = 1, rt%nstate
             drho_k(i, j) = 0.0d0
@@ -74,6 +77,7 @@ subroutine calc_drho_k(drho_k, rho_k, p_k, rvnl_k, Ac)
             end do
         end do
     end do
+    !!!$omp end parallel do
     
 end subroutine calc_drho_k
 end subroutine dt_evolve_bloch

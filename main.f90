@@ -41,14 +41,12 @@ program main
     do i = 1, nt
         write(*, "(a)") "# CALL dt_evolve_bloch"; flush(6)
         call dt_evolve_bloch(rt, gs, dt, Ac_ext(:, i-1), Ac_ext(:, i))
-        write(*,*) -3; flush(6)
-        stop "SC"
         write(*, "(f12.6,99es25.15e4)") i*dt, Ac_ext(:, i), calc_total(rt, gs)
         ! write(*, "(a)") "# --- dt_evolve_bloch"; flush(0)
         ! call dt_evolve_bloch(rt, gs, dt, Ac_ext(:, i-1), Ac_ext(:, i))
         ! write(*, "(f12.6,99es25.15e4)") i*dt, Ac_ext(:, i)
     end do
-
+    stop "Good bye"
     ! if (0.0d0 < al(1)) al_vec1(1:3) = (/ al(1), 0.0d0, 0.0d0 /)
     ! if (0.0d0 < al(2)) al_vec2(1:3) = (/ 0.0d0, al(2), 0.0d0 /)
     ! if (0.0d0 < al(3)) al_vec3(1:3) = (/ 0.0d0, 0.0d0, al(3) /)
