@@ -28,7 +28,7 @@ program main
     call read_input()
 
     write(*, "(a)") "# CALL: load_elk_data"; flush(0)
-    call load_elk_data(gs, nkgrid(1)*nkgrid(2)*nkgrid(3),  nstate_gs, base_directory_gs)
+    call load_elk_data(gs, nkgrid(1)*nkgrid(2)*nkgrid(3),  nstate_gs, al(1)*al(2)*al(3), base_directory_gs)
 
     write(*, "(a)") "# CALL: init_bloch"; flush(0)
     call init_bloch(rt, gs)

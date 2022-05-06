@@ -92,7 +92,7 @@ subroutine current(jcur, rt, gs, Ac)
     do ik = 1, rt%nk
         do ib = 1, rt%nstate
             do jb = 1, rt%nstate
-                jcur(:) = jcur(:) + gs%kweight(ik) * ( &
+                jcur(:) = jcur(:) + (gs%kweight(ik) / gs%volume) * ( &
                     & gs%pmatrix(ib, jb, :, ik) * rt%rho(jb, ib, ik) &
                     & + gs%rvnl(ib, jb, :, ik) * rt%rho(jb, ib, ik) &
                     & + Ac(:) * rt%rho(ib, ib, ik) &

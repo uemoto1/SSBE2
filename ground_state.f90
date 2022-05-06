@@ -19,6 +19,8 @@ module ground_state
         ! [r, Vnl] matrix element
         complex(8), allocatable :: rvnl(:, :, :, :)
         logical :: use_nonlocal_potential
+        ! Volume
+        real(8) :: volume
     end type
 
 contains
@@ -124,11 +126,12 @@ end subroutine load_salmon_data
 
 
 
-subroutine load_elk_data(gs, nk, nstate, base_directory)
+subroutine load_elk_data(gs, nk, nstate, volume, base_directory)
     implicit none
     type(gs_data), intent(inout) :: gs
     integer, intent(in) :: nk
     integer, intent(in) :: nstate
+    real(8), intent(in) :: volume
     character(*), intent(in) :: base_directory
     character(99) :: file_kpoints
     character(99) :: file_eigval
@@ -141,6 +144,7 @@ subroutine load_elk_data(gs, nk, nstate, base_directory)
 
     gs%nk = nk
     gs%nstate = nstate
+    gs%volume = volume
     allocate(gs%kpoint(3, nk))
     allocate(gs%kweight(nk))
     allocate(gs%eigen(nstate, nk))
