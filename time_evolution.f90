@@ -38,12 +38,12 @@ subroutine dt_evolve_bloch(rt, gs, dt, Ac0, Ac1)
 
      ! Modified Euler
      write(*,*) "START"; 
-     write(*,*) shape(drho1, 1)
-     write(*,*) shape(drho1, 2)
-     write(*,*) shape(drho1, 3)
-     write(*,*) shape(rt%rho, 1)
-     write(*,*) shape(rt%rho, 2)
-     write(*,*) shape(rt%rho, 3)
+     write(*,*) lbound(drho1, 1), ubound(drho1, 1)
+     write(*,*) lbound(drho1, 2), ubound(drho1, 2)
+     write(*,*) lbound(drho1, 3), ubound(drho1, 3)
+     write(*,*) lbound(rt%rho, 1), ubound(rt%rho, 1)
+     write(*,*) lbound(rt%rho, 2), ubound(rt%rho, 2)
+     write(*,*) lbound(rt%rho, 3), ubound(rt%rho, 3)
      
      flush(6)
      stop "Hey!"
