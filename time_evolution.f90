@@ -41,34 +41,34 @@ subroutine dt_evolve_bloch(rt, gs, dt, Ac0, Ac1)
     !$omp parallel do default(shared) private(ik, drho_k1, rho_k2, drho_k2)
     do ik = 1, rt%nk
         call calc_drho_k(drho_k1, rt%rho(:, :, ik), &
-            & gs%pmatrix(:, :, :, ik), gs%rvnl(:, :, :, ik), Ac0)
+            & gs%eigen(:, ik), gs%pmatrix(:, :, :, ik), gs%rvnl(:, :, :, ik), Ac0)
         rho_k2 = rt%rho(:, :, ik) + dt * drho_k1
         call calc_drho_k(drho_k2, rho_k2, &
-            & gs%pmatrix(:, :, :, ik), gs%rvnl(:, :, :, ik), Ac1)
+            & gs%eigen(:, ik), gs%pmatrix(:, :, :, ik), gs%rvnl(:, :, :, ik), Ac1)
         rt%rho(:, :, ik) = rt%rho(:, :, ik) + 0.5 * dt * (drho_k1 + drho_k2)
     end do
     !$omp end parallel do
 
 contains
 
-subroutine calc_drho_k(drho_k, rho_k, p_k, rvnl_k, Ac)
+subroutine calc_drho_k(drho_k, rho_k, e_k, p_k, rvnl_k, Ac)
     implicit none
     complex(8), intent(out) :: drho_k(rt%nstate, rt%nstate)
     complex(8), intent(in) :: rho_k(rt%nstate, rt%nstate)
+    real(8), intent(in) :: e_k(rt%nstate)
     complex(8), intent(in) :: p_k(rt%nstate, rt%nstate, 3)
     complex(8), intent(in) :: rvnl_k(rt%nstate, rt%nstate, 3)
     real(8), intent(in) :: Ac(3)
     integer :: i, j, l, n
-    real(8) :: t
 
     !$omp parallel do default(shared) private(i,j) collapse(2)
     do j = 1, rt%nstate
         do i = 1, rt%nstate
-            drho_k(i, j) = 0.0d0
+            drho_k(i, j) = dcmplx(0.0, -1.0) * (e_k(i) - e_k(j)) * rho_k(i, j)
             do n = 1, 3
                 do l = 1, rt%nstate
-                    drho_k(i, j) = drho_k(i, j) + dcmplx(0.0, -1.0) * Ac(n) &
-                        & * ((p_k(i, l, n) + rvnl_k(i, l, n)) * rho_k(l, j) &
+                    drho_k(i, j) = drho_k(i, j) + dcmplx(0.0, -1.0) * Ac(n) * ( &
+                        & (p_k(i, l, n) + rvnl_k(i, l, n)) * rho_k(l, j) &
                         & -  rho_k(i, l) * (p_k(l, j, n) + rvnl_k(l, j, n)))
                 end do
             end do
