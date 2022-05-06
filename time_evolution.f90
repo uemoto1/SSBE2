@@ -37,15 +37,6 @@ subroutine dt_evolve_bloch(rt, gs, dt, Ac0, Ac1)
     complex(8) :: drho2(rt%nstate, rt%nstate, rt%nk)
 
      ! Modified Euler
-     write(*,*) "START"; 
-     write(*,*) lbound(drho1, 1), ubound(drho1, 1)
-     write(*,*) lbound(drho1, 2), ubound(drho1, 2)
-     write(*,*) lbound(drho1, 3), ubound(drho1, 3)
-     write(*,*) lbound(rt%rho, 1), ubound(rt%rho, 1)
-     write(*,*) lbound(rt%rho, 2), ubound(rt%rho, 2)
-     write(*,*) lbound(rt%rho, 3), ubound(rt%rho, 3)
-     
-     flush(6)
      call calc_drho(drho1, rt%rho, Ac0)
      stop "Hey!"
 
@@ -62,13 +53,21 @@ subroutine calc_drho(drho, rho, Ac)
     real(8), intent(in) :: Ac(3)
     integer :: i, j, l, n, ik
     
-    write(*,*) "calc_drho1"; flush(6)
+    write(999, *) "Stage1"
+    flush(999)
+
     drho(:, :, :) = 0.0d0
-    write(*,*) "calc_drho1"; flush(6)
+    write(999,*) "BOUNDS", lbound(drho, 1), ubound(drho, 1)
+    write(999,*) "BOUNDS", lbound(drho, 2), ubound(drho, 2)
+    write(999,*) "BOUNDS", lbound(drho, 3), ubound(drho, 3)
+    flush(999)
+
     ! stop "HEYHEY"
     !!$omp parallel do default(shared) private(ik,n,i,j,l) collapse(3)
+    write(*, *)
     do ik = 1, rt%nk
         write(*,*) 3; flush(6)
+        write(*,*) "calc_drho1"; flush(6)
         do i = 1, rt%nstate
     !         write(*,*) 4; flush(0)
             do j = 1, rt%nstate
@@ -77,7 +76,7 @@ subroutine calc_drho(drho, rho, Ac)
     !                 write(*,*) 6; flush(0)
                     do l = 1, rt%nstate
                         ! write(*,*) 7; flush(0)
-                        drho(i, j, ik) = drho(i, j, ik) + dcmplx(0.0, -1.0) * Ac(n) !&
+                        ! drho(i, j, ik) = drho(i, j, ik) + dcmplx(0.0, -1.0) * Ac(n) !&
                         !& * ((gs%pmatrix(i, l, n, ik) + gs%rvnl(i, l, n, ik)) * rho(l, j, ik) &
                         !& -  rho(i, l, ik) * (gs%pmatrix(l, j, n, ik) + gs%rvnl(l, j, n, ik)))
     !                   !  write(*,*) 8; flush(0)
