@@ -51,11 +51,11 @@ subroutine calc_drho(drho, rho, Ac)
     integer :: i, j, l, n, ik
     
     drho(:, :, :) = 0.0d0
-    !$omp parallel do
+    !$omp parallel do default(shared) private(ik,n,i,j,l) collapse(3)
     do ik = 1, rt%nk
-        do n = 1, 3
-            do i = 1, rt%nstate
-                do j = 1, rt%nstate
+        do i = 1, rt%nstate
+            do j = 1, rt%nstate
+                do n = 1, 3
                     do l = 1, rt%nstate
                         drho(i, j, ik) = drho(i, j, ik) + dcmplx(0.0, -1.0) * Ac(n) &
                             & * ((gs%pmatrix(i, l, n, ik) + gs%rvnl(i, l, n, ik)) * rho(l, j, ik) &
