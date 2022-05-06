@@ -40,7 +40,7 @@ program main
     
     do i = 1, nt
         write(*, "(a)") "# --- dt_evolve_bloch"; flush(0)
-        write(*,*) -1; flush(6)
+        write(*,*) -2; flush(6)
         call dt_evolve_bloch(rt, gs, dt, Ac_ext(:, i-1), Ac_ext(:, i))
         write(*,*) -3; flush(6)
         stop
