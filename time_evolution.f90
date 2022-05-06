@@ -37,7 +37,7 @@ subroutine dt_evolve_bloch(rt, gs, dt, Ac0, Ac1)
 !     complex(8) :: drho2(rt%nstate, rt%nstate, rt%nk)
 
      ! Modified Euler
-     write(*,*) -1; flush(6)
+     write(*,*) "START"; flush(6)
      stop "Hey!"
 !     call calc_drho(drho1, rt%rho, Ac0)
 !     write(*,*) -2; flush(0)

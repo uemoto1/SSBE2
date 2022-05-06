@@ -36,11 +36,10 @@ program main
 
     write(*, "(a)") "# CALL: calc_Ac_ext_t"; flush(0)
     call calc_Ac_ext_t(0.0d0, dt, 0, nt, Ac_ext)
-    write(*,*) -1; flush(6)
+    write(*,*) "AFTER calc_Ac_ext_t"; flush(6)
     
     do i = 1, nt
-        write(*, "(a)") "# --- dt_evolve_bloch"; flush(0)
-        write(*,*) -2; flush(6)
+        write(*, "(a)") "# CALL dt_evolve_bloch"; flush(6)
         call dt_evolve_bloch(rt, gs, dt, Ac_ext(:, i-1), Ac_ext(:, i))
         write(*,*) -3; flush(6)
         stop
