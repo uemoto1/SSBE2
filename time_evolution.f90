@@ -27,16 +27,21 @@ subroutine init_bloch(rt, gs)
     return
 end subroutine init_bloch
 
-subroutine dt_evolve_bloch(rt, gs, dt, Ac0)
+subroutine dt_evolve_bloch(rt, gs, dt, Ac0, Ac1)
     implicit none
     type(rt_data), intent(inout) :: rt
     type(gs_data), intent(in) :: gs
-    real(8), intent(in) :: dt, Ac0(3)
+    real(8), intent(in) :: dt, Ac0(3), Ac1(3)
     complex(8) :: drho1(rt%nstate, rt%nstate, rt%nk)
+    complex(8) :: rho2(rt%nstate, rt%nstate, rt%nk)
+    complex(8) :: drho2(rt%nstate, rt%nstate, rt%nk)
 
-    ! Simple Euler
+    ! Modified Euler
     call calc_drho(drho1, rt%rho, Ac0)
-    rt%rho = rt%rho + dt * drho1
+    rho2 = rt%rho + dt * drho1
+    call calc_drho(drho2, rho2, Ac0)
+    rt%rho = rt%rho + 0.5d0 * dt * (drho1 + drho2)
+
 contains
 
 subroutine calc_drho(drho, rho, Ac)

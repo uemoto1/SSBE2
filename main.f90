@@ -4,6 +4,7 @@ program main
     use input_parameter
     use ground_state
     use time_evolution
+    use em_field
     ! use test
     ! use em_field
     implicit none
@@ -21,17 +22,25 @@ program main
     type(gs_data) :: gs
     type(rt_data) :: rt
 
+    real(8), allocatable :: Ac_ext(:, :)
+
     call read_input()
 
-    write(*, "(a)") "# --- load_elk_data"; flush(0)
+    write(*, "(a)") "# CALL: load_elk_data"; flush(0)
     call load_elk_data(gs, nkgrid(1)*nkgrid(2)*nkgrid(3),  nstate_gs, base_directory_gs)
 
-    write(*, "(a)") "# --- init_bloch"; flush(0)
+    write(*, "(a)") "# CALL: init_bloch"; flush(0)
     call init_bloch(rt, gs)
-    do i = 1, 1000
+
+    allocate(Ac_ext(3, 0:nt))
+
+    write(*, "(a)") "# CALL: calc_Ac_ext_t"; flush(0)
+    call calc_Ac_ext_t(0.0d0, dt, 0, nt, Ac_ext)
+
+    do i = 1, nt
         write(*, "(a)") "# --- dt_evolve_bloch"; flush(0)
-        call dt_evolve_bloch(rt, gs, dt, (/ 0.0d0, 0.0d0, 0.0d0 /))
-        write(*, *) calc_total(rt, gs)
+        call dt_evolve_bloch(rt, gs, dt, Ac_ext(:, i-1), Ac_ext(:, i))
+        write(*, "(f12.6,99es25.15e4)") i*dt, Ac_ext(:, i), calc_total(rt, gs)
     end do
 
     ! if (0.0d0 < al(1)) al_vec1(1:3) = (/ al(1), 0.0d0, 0.0d0 /)
