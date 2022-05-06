@@ -90,7 +90,7 @@ real(8) function calc_total(rt, gs)
     integer :: ik, ib
     real(8) :: tmp
     tmp = 0.0d0
-    !$omp parallel do default(shared) private(ik, ib) reduction(+:tmp)
+    !$omp parallel do default(shared) private(ik,ib) reduction(+:tmp)
     do ik = 1, rt%nk
         do ib = 1, rt%nstate
             tmp = tmp + gs%kweight(ik) * real(rt%rho(ib, ib, ik))
