@@ -1,6 +1,5 @@
 ! This file is automatically created by input_parameter.py
 module input_parameter
-    use salmon_file, only: open_filehandle
     implicit none
 
     character(256) :: theory
@@ -47,7 +46,7 @@ contains
 
     subroutine read_input()
         implicit none
-        integer :: ret, fh
+        integer :: ret
         character(256) :: tmp
 
         namelist/calculation/ &
@@ -144,23 +143,21 @@ contains
         gamma = 5.0d-3
 
 
-        fh = open_filehandle('.namelist.tmp')
+        open(11, file='.namelist.tmp')
         do while (.true.)
             read(*, '(a)', iostat=ret) tmp
             if (ret < 0) exit ! End of file
             tmp = adjustl(tmp)
-            if (tmp(1:1) .ne. '!') write(fh, '(a)') trim(tmp)
+            if (tmp(1:1) .ne. '!') write(11, '(a)') trim(tmp)
         end do
-        rewind(fh); read(fh, nml=calculation, iostat=ret)
-        rewind(fh); read(fh, nml=control, iostat=ret)
-        rewind(fh); read(fh, nml=system, iostat=ret)
-        rewind(fh); read(fh, nml=kgrid, iostat=ret)
-        rewind(fh); read(fh, nml=tgrid, iostat=ret)
-        rewind(fh); read(fh, nml=emfield, iostat=ret)
-        rewind(fh); read(fh, nml=analysis, iostat=ret)
-
-
-        close(fh)
+        rewind(11); read(11, nml=calculation, iostat=ret)
+        rewind(11); read(11, nml=control, iostat=ret)
+        rewind(11); read(11, nml=system, iostat=ret)
+        rewind(11); read(11, nml=kgrid, iostat=ret)
+        rewind(11); read(11, nml=tgrid, iostat=ret)
+        rewind(11); read(11, nml=emfield, iostat=ret)
+        rewind(11); read(11, nml=analysis, iostat=ret)
+        close(11)
 
         write(*, '(a)') '# calculation'
         write(*, '(a, a)') '# theory=', trim(theory)

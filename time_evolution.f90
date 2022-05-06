@@ -32,15 +32,18 @@ subroutine dt_evolve_bloch(rt, gs, dt, Ac0, Ac1)
     type(rt_data), intent(inout) :: rt
     type(gs_data), intent(in) :: gs
     real(8), intent(in) :: dt, Ac0(3), Ac1(3)
-    ! complex(8) :: drho1(rt%nstate, rt%nstate, rt%nk)
-    ! complex(8) :: rho2(rt%nstate, rt%nstate, rt%nk)
-    ! complex(8) :: drho2(rt%nstate, rt%nstate, rt%nk)
-    complex(8), allocatable :: drho1(:,:,:)
-    allocate(drho1(rt%nstate, rt%nstate, rt%nk))
+    complex(8) :: drho_k1(rt%nstate, rt%nstate)
+    ! complex(8) :: rho_k2(rt%nstate, rt%nstate)
+    ! complex(8) :: drho_k2(rt%nstate, rt%nstate)
+    ! allocate(drho1(rt%nstate, rt%nstate, rt%nk))
+    integer :: ik
 
+    do ik = 1, rt%nk
+        call calc_drho_k(drho_k1, rt%rho(:, :, ik), &
+            & gs%pmatrix(:, :, :, ik), gs%rvnl(:, :, :, ik), Ac0)
+    end do
 
      ! Modified Euler
-     call calc_drho(drho1, rt%rho, Ac0)
      stop "Hey!"
 
 !     write(*,*) -2; flush(0)
@@ -49,55 +52,30 @@ subroutine dt_evolve_bloch(rt, gs, dt, Ac0, Ac1)
 !     rt%rho = rt%rho + 0.5d0 * dt * (drho1 + drho2)
 contains
 
-subroutine calc_drho(drho, rho, Ac)
+subroutine calc_drho_k(drho_k, rho_k, p_k, rvnl_k, Ac)
     implicit none
-    complex(8), intent(out) :: drho(rt%nstate, rt%nstate, rt%nk)
-    complex(8), intent(in) :: rho(rt%nstate, rt%nstate, rt%nk)
+    complex(8), intent(out) :: drho_k(rt%nstate, rt%nstate)
+    complex(8), intent(in) :: rho_k(rt%nstate, rt%nstate)
+    complex(8), intent(in) :: p_k(rt%nstate, rt%nstate, 3)
+    complex(8), intent(in) :: rvnl_k(rt%nstate, rt%nstate, 3)
     real(8), intent(in) :: Ac(3)
-    integer :: i, j, l, n, ik
+    integer :: i, j, l, n
     real(8) :: t
-    
-    write(999, *) "Stage1"
-    flush(999)
 
-    drho(:, :, :) = 0.0d0
-    write(999,*) "lbound(drho, 1), ubound(drho, 1)", lbound(drho, 1), ubound(drho, 1)
-    write(999,*) "lbound(drho, 2), ubound(drho, 2)", lbound(drho, 2), ubound(drho, 2)
-    write(999,*) "lbound(drho, 3), ubound(drho, 3)", lbound(drho, 3), ubound(drho, 3)
-    flush(999)
-    write(999,*) "lbound(Ac, 1), ubound(Ac, 1)", lbound(Ac, 1), ubound(Ac, 1)
-    flush(999)
-    write(999,*) "Ac", Ac
-    flush(999)
-
-
-    ! stop "HEYHEY"
-    !!$omp parallel do default(shared) private(ik,n,i,j,l) collapse(3)
-    write(*, *)
-    do ik = 1, rt%nk
-        write(*,*) 3; flush(6)
-        write(*,*) "calc_drho1"; flush(6)
-        do j = 1, rt%nstate
-    !         write(*,*) 4; flush(0)
-            do i = 1, rt%nstate
-    !             write(*,*) 5; flush(0)
-                t = 1.0d0
-
-                do n = 1, 3
-    !                 write(*,*) 6; flush(0)
-                    do l = 1, rt%nstate
-                        ! write(*,*) 7; flush(0)
-                        !drho(i, j, ik) = drho(i, j, ik) + dcmplx(0.0, -1.0) * Ac(n) !&
-                        !& * ((gs%pmatrix(i, l, n, ik) + gs%rvnl(i, l, n, ik)) * rho(l, j, ik) &
-                        !& -  rho(i, l, ik) * (gs%pmatrix(l, j, n, ik) + gs%rvnl(l, j, n, ik)))
-    !                   !  write(*,*) 8; flush(0)
-                    end do
+    do j = 1, rt%nstate
+        do i = 1, rt%nstate
+            drho_k(i, j) = 0.0d0
+            do n = 1, 3
+                do l = 1, rt%nstate
+                    drho_k(i, j) = drho_k(i, j) + dcmplx(0.0, -1.0) * Ac(n) &
+                        & * ((p_k(i, l, n) + rvnl_k(i, l, n)) * rho_k(l, j) &
+                        & -  rho_k(i, l) * (p_k(l, j, n) + rvnl_k(l, j, n)))
                 end do
             end do
         end do
     end do
-    ! !!$omp end parallel do
-end subroutine calc_drho
+    
+end subroutine calc_drho_k
 end subroutine dt_evolve_bloch
 
 
