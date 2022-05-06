@@ -62,9 +62,9 @@ subroutine calc_drho(drho, rho, Ac)
     real(8), intent(in) :: Ac(3)
     ! integer :: i, j, l, n, ik
     
-    ! write(*,*) "calc_drho1"; flush(6)
-    ! drho(:, :, :) = 0.0d0
-    ! write(*,*) "calc_drho1"; flush(6)
+    write(*,*) "calc_drho1"; flush(6)
+    drho(:, :, :) = 0.0d0
+    write(*,*) "calc_drho1"; flush(6)
     ! stop "HEYHEY"
     ! !!$omp parallel do default(shared) private(ik,n,i,j,l) collapse(3)
     ! do ik = 1, rt%nk
