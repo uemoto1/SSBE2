@@ -32,9 +32,9 @@ subroutine dt_evolve_bloch(rt, gs, dt, Ac0, Ac1)
     type(rt_data), intent(inout) :: rt
     type(gs_data), intent(in) :: gs
     real(8), intent(in) :: dt, Ac0(3), Ac1(3)
-!     complex(8) :: drho1(rt%nstate, rt%nstate, rt%nk)
-!     complex(8) :: rho2(rt%nstate, rt%nstate, rt%nk)
-!     complex(8) :: drho2(rt%nstate, rt%nstate, rt%nk)
+    complex(8) :: drho1(rt%nstate, rt%nstate, rt%nk)
+    complex(8) :: rho2(rt%nstate, rt%nstate, rt%nk)
+    complex(8) :: drho2(rt%nstate, rt%nstate, rt%nk)
 
      ! Modified Euler
      write(*,*) "START"; flush(6)
