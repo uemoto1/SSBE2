@@ -79,7 +79,7 @@ subroutine dt_evolve_bloch(rt, gs, dt, Ac0, Ac1)
 !     !!$omp end parallel do
 !     return
 ! end subroutine calc_drho
-! end subroutine dt_evolve_bloch
+end subroutine dt_evolve_bloch
 
 
 real(8) function calc_total(rt, gs)
