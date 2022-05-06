@@ -96,7 +96,7 @@ real(8) function calc_total(rt, gs)
             tmp = tmp + gs%kweight(ik) * real(rt%rho(ib, ib, ik))
         end do
     end do
-    !$omp end do parallel
+    !$omp end parallel do
     calc_total = tmp
     return
 end function
