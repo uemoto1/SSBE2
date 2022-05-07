@@ -18,8 +18,8 @@
 /
 
 &tgrid
-    dt = 0.01d0
-    nt = 50000
+    dt = 0.1d0
+    nt = 5000
 /
 
 &emfield

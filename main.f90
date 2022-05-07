@@ -31,13 +31,17 @@ program main
     call load_elk_data(gs, nkgrid(1)*nkgrid(2)*nkgrid(3),  nstate_gs, al(1)*al(2)*al(3), base_directory_gs)
 
     write(*, "(a)") "# CALL: init_bloch"; flush(0)
+
+    gs%occup(1:16, :) = 2.0d0
+    gs%occup(17:, :) = 0.0d0
+
     call init_bloch(rt, gs)
 
     allocate(Ac_ext(3, 0:nt))
 
     write(*, "(a)") "# CALL: calc_Ac_ext_t"; flush(0)
     call calc_Ac_ext_t(0.0d0, dt, 0, nt, Ac_ext)
-    
+
     do i = 1, nt
         call dt_evolve_bloch(rt, gs, dt, Ac_ext(:, i-1), Ac_ext(:, i))
         call current(jcur, qtot, rt, gs, Ac_ext(:, i))
