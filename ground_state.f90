@@ -14,11 +14,14 @@ module ground_state
         real(8), allocatable :: eigen(:, :)
         ! Occupation
         real(8), allocatable :: occup(:, :)
-        ! Momentum matrix
+        ! P matrix 
         complex(8), allocatable :: pmatrix(:, :, :, :)
-        ! [r, Vnl] matrix element
-        complex(8), allocatable :: rvnl(:, :, :, :)
-        logical :: use_nonlocal_potential
+        ! Transition moment
+        complex(8), allocatable :: tm_p(:, :, :, :)
+        ! -i[r, Vnl] matrix element
+        complex(8), allocatable :: tm_irvnl(:, :, :, :)
+        ! Energy difference
+        real(8), allocatable :: omega(:, :, :)
         ! Volume
         real(8) :: volume
     end type
@@ -47,7 +50,9 @@ subroutine load_salmon_data(gs, nk, nstate, sysname, base_directory)
     allocate(gs%eigen(nstate, nk))
     allocate(gs%occup(nstate, nk))
     allocate(gs%pmatrix(nstate, nstate, 3, nk))
-    allocate(gs%rvnl(nstate, nstate, 3, nk))
+    allocate(gs%tm_p(nstate, nstate, 3, nk))
+    allocate(gs%tm_irvnl(nstate, nstate, 3, nk))
+    allocate(gs%omega(nstate, nstate, nk))
 
     file_k_data = trim(base_directory) // "/" // trim(sysname) // "_k.data"
     write(*, "(a,a)") "# Open:", trim(file_k_data); flush(0)
@@ -98,14 +103,13 @@ subroutine load_salmon_data(gs, nk, nstate, sysname, base_directory)
                 if (ik .ne. iik) stop "ik mismatch"
                 if (ib .ne. iib) stop "ib mismatch"
                 if (jb .ne. jjb) stop "jb mismatch"
-                gs%pmatrix(ib, jb, 1, ik) = dcmplx(ctmp(1), ctmp(2))
-                gs%pmatrix(ib, jb, 2, ik) = dcmplx(ctmp(3), ctmp(4))
-                gs%pmatrix(ib, jb, 3, ik) = dcmplx(ctmp(5), ctmp(6))
+                gs%tm_p(ib, jb, 1, ik) = dcmplx(ctmp(1), ctmp(2))
+                gs%tm_p(ib, jb, 2, ik) = dcmplx(ctmp(3), ctmp(4))
+                gs%tm_p(ib, jb, 3, ik) = dcmplx(ctmp(5), ctmp(6))
             end do
         end do
     end do
     read(10, "(a)") dummy; write(*, "('#>',4x,a)") trim(dummy)
-    gs%use_nonlocal_potential = .true.
     do ik = 1, nk
         do ib = 1, nstate
             do jb = 1, nstate
@@ -113,13 +117,22 @@ subroutine load_salmon_data(gs, nk, nstate, sysname, base_directory)
                 if (ik .ne. iik) stop "ik mismatch"
                 if (ib .ne. iib) stop "ib mismatch"
                 if (jb .ne. jjb) stop "jb mismatch"
-                gs%rvnl(ib, jb, 1, ik) = dcmplx(ctmp(1), ctmp(2))
-                gs%rvnl(ib, jb, 2, ik) = dcmplx(ctmp(3), ctmp(4))
-                gs%rvnl(ib, jb, 3, ik) = dcmplx(ctmp(5), ctmp(6))
+                gs%tm_irvnl(ib, jb, 1, ik) = dcmplx(ctmp(1), ctmp(2))
+                gs%tm_irvnl(ib, jb, 2, ik) = dcmplx(ctmp(3), ctmp(4))
+                gs%tm_irvnl(ib, jb, 3, ik) = dcmplx(ctmp(5), ctmp(6))
             end do
         end do
     end do
     close(10)
+    gs%pmatrix(:, :, :, :) = gs%tm_p(:, :, :, :) + gs%tm_irvnl(:, :, :, :)
+
+    do ik = 1, nk
+        do ib = 1, nstate
+            do jb = 1, nstate
+                gs%omega(ib, jb, ik) = gs%eigen(ib, ik) - gs%eigen(jb, ik)
+            end do
+        end do
+    end do
 
     return
 end subroutine load_salmon_data
@@ -150,7 +163,9 @@ subroutine load_elk_data(gs, nk, nstate, volume, base_directory)
     allocate(gs%eigen(nstate, nk))
     allocate(gs%occup(nstate, nk))
     allocate(gs%pmatrix(nstate, nstate, 3, nk))
-    allocate(gs%rvnl(nstate, nstate, 3, nk))
+    allocate(gs%tm_p(nstate, nstate, 3, nk))
+    allocate(gs%tm_irvnl(nstate, nstate, 3, nk))
+    allocate(gs%omega(nstate, nstate, nk))
 
     file_kpoints = trim(base_directory) // "/" // "KPOINTS.OUT"
     write(*, "(a,a)") "# Open:", trim(file_kpoints); flush(0)
@@ -196,13 +211,22 @@ subroutine load_elk_data(gs, nk, nstate, volume, base_directory)
         if (abs(ctmp(1) - gs%kpoint(1, ik)) > 1d-9) stop "k1 mismatch"
         if (abs(ctmp(2) - gs%kpoint(2, ik)) > 1d-9) stop "k2 mismatch"
         if (abs(ctmp(3) - gs%kpoint(3, ik)) > 1d-9) stop "k3 mismatch"
-        gs%pmatrix(:, :, :, ik) = ptmp(:, :, :)
+        gs%tm_p(:, :, :, ik) = ptmp(:, :, :)
     end do
-    gs%rvnl(:, :, :, :) = 0.0d0
-    gs%use_nonlocal_potential = .false.
     deallocate(ptmp)
     close(10)
-end subroutine
+    gs%tm_irvnl(:, :, :, :) = 0.0d0
+    gs%pmatrix(:, :, :, :) = gs%tm_p(:, :, :, :)
+
+    do ik = 1, nk
+        do ib = 1, nstate
+            do jb = 1, nstate
+                gs%omega(ib, jb, ik) = gs%eigen(ib, ik) - gs%eigen(jb, ik)
+            end do
+        end do
+    end do
+
+end subroutine load_elk_data
 end module ground_state
 
 

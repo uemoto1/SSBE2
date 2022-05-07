@@ -37,22 +37,22 @@ subroutine dt_evolve_bloch(rt, gs, dt, Ac0, Ac1)
     complex(8) :: drho2_k(rt%nstate, rt%nstate)
     complex(8) :: drho3_k(rt%nstate, rt%nstate)
     complex(8) :: drho4_k(rt%nstate, rt%nstate)
-    ! allocate(drho1(rt%nstate, rt%nstate, rt%nk))
     integer :: ik
 
     !$omp parallel do default(shared) private(ik,rho_k_tmp,drho1_k,drho2_k,drho3_k,drho4_k)
     do ik = 1, rt%nk
-        call calc_drho_k(drho1_k, rt%rho(:, :, ik), &
-            & gs%eigen(:, ik), gs%pmatrix(:, :, :, ik), gs%rvnl(:, :, :, ik), Ac0)
+        ! 4th-order Runge-Kutta method
+        call calc_drho_k(rt%nstate, drho1_k, rt%rho(:, :, ik), &
+            & gs%omega(:, :, ik), gs%pmatrix(:, :, :, ik), Ac0)
         rho_k_tmp = rt%rho(:, :, ik) + 0.5 * dt * drho1_k
-        call calc_drho_k(drho2_k, rho_k_tmp, &
-            & gs%eigen(:, ik), gs%pmatrix(:, :, :, ik), gs%rvnl(:, :, :, ik), 0.5*(Ac0+Ac1))
+        call calc_drho_k(rt%nstate, drho2_k, rho_k_tmp, &
+            & gs%omega(:, :, ik), gs%pmatrix(:, :, :, ik), 0.5*(Ac0+Ac1))
         rho_k_tmp = rt%rho(:, :, ik) + 0.5 * dt * drho2_k
-        call calc_drho_k(drho3_k, rho_k_tmp, &
-            & gs%eigen(:, ik), gs%pmatrix(:, :, :, ik), gs%rvnl(:, :, :, ik), 0.5*(Ac0+Ac1))
+        call calc_drho_k(rt%nstate, drho3_k, rho_k_tmp, &
+            & gs%omega(:, :, ik), gs%pmatrix(:, :, :, ik), 0.5*(Ac0+Ac1))
         rho_k_tmp = rt%rho(:, :, ik) + dt * drho3_k
-        call calc_drho_k(drho4_k, rho_k_tmp, &
-            & gs%eigen(:, ik), gs%pmatrix(:, :, :, ik), gs%rvnl(:, :, :, ik), Ac1)
+        call calc_drho_k(rt%nstate, drho4_k, rho_k_tmp, &
+            & gs%omega(:, :, ik), gs%pmatrix(:, :, :, ik), Ac1)
         rt%rho(:, :, ik) = rt%rho(:, :, ik) &
             & + (dt/6) * (drho1_k(:, :) + 2*drho2_k(:, :) + 2*drho3_k(:, :) + drho4_k(:, :))
     end do
@@ -60,29 +60,21 @@ subroutine dt_evolve_bloch(rt, gs, dt, Ac0, Ac1)
 
 contains
 
-subroutine calc_drho_k(drho_k, rho_k, e_k, p_k, rvnl_k, Ac)
+subroutine calc_drho_k(nstate, drho_k, rho_k, omega_k, p_k, Ac)
     implicit none
-    complex(8), intent(out) :: drho_k(rt%nstate, rt%nstate)
-    complex(8), intent(in) :: rho_k(rt%nstate, rt%nstate)
-    real(8), intent(in) :: e_k(rt%nstate)
-    complex(8), intent(in) :: p_k(rt%nstate, rt%nstate, 3)
-    complex(8), intent(in) :: rvnl_k(rt%nstate, rt%nstate, 3)
+    integer, intent(in) :: nstate
+    complex(8), intent(out) :: drho_k(nstate, nstate)
+    complex(8), intent(in) :: rho_k(nstate, nstate)
+    real(8), intent(in) :: omega_k(nstate, nstate)
+    complex(8), intent(in) :: p_k(nstate, nstate, 3)
     real(8), intent(in) :: Ac(3)
-    integer :: i, j, l, n
+    integer :: i
 
-    do j = 1, rt%nstate
-        do i = 1, rt%nstate
-            drho_k(i, j) = dcmplx(0.0, -1.0) * (e_k(i) - e_k(j)) * rho_k(i, j)
-            do n = 1, 3
-                do l = 1, rt%nstate
-                    drho_k(i, j) = drho_k(i, j) + dcmplx(0.0, -1.0) * Ac(n) * ( &
-                        & (p_k(i, l, n) + rvnl_k(i, l, n)) * rho_k(l, j) &
-                        & -  rho_k(i, l) * (p_k(l, j, n) + rvnl_k(l, j, n)))
-                end do
-            end do
-        end do
+    drho_k(:, :) = dcmplx(0.0, -1.0) * omega_k(:, :) * rho_k(:, :)
+    do i = 1, 3
+        drho_k(:, :) = drho_k(:, :) + dcmplx(0.0, -Ac(i)) * ( &
+            & matmul(p_k(:, :, i), rho_k(:, :)) - matmul(rho_k(:, :), p_k(:, :, i)))
     end do
-    
 end subroutine calc_drho_k
 end subroutine dt_evolve_bloch
 
@@ -101,15 +93,14 @@ subroutine current(jcur, qtot, rt, gs, Ac)
     do ik = 1, rt%nk
         do ib = 1, rt%nstate
             qtot = qtot + gs%kweight(ik) * real(rt%rho(ib, ib, ik))
-            jcur(:) = jcur(:) + (gs%kweight(ik) / gs%volume) * Ac(:) * real(rt%rho(ib, ib, ik))
             do jb = 1, rt%nstate
                 jcur(:) = jcur(:) + (gs%kweight(ik) / gs%volume) * real( &
-                    & gs%pmatrix(ib, jb, :, ik) * rt%rho(jb, ib, ik) &
-                    & + gs%rvnl(ib, jb, :, ik) * rt%rho(jb, ib, ik))
+                    & gs%pmatrix(ib, jb, :, ik) * rt%rho(jb, ib, ik))
             end do
         end do
     end do
     !$omp end parallel do
+    jcur(:) = jcur(:) + Ac(:) * qtot / gs%volume
     return
 end subroutine
     
