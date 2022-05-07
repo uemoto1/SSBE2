@@ -21,7 +21,10 @@ program main
 
     type(gs_data) :: gs
     type(rt_data) :: rt
-    real(8) :: jcur(3), qtot
+    real(8) :: jcur(3)
+
+
+    real(8) :: E(3), P(3)
 
     real(8), allocatable :: Ac_ext(:, :)
     integer :: ik, ib
@@ -69,10 +72,16 @@ program main
     write(*, "(a)") "# CALL: calc_Ac_ext_t"; flush(0)
     call calc_Ac_ext_t(0.0d0, dt, 0, nt, Ac_ext)
 
+    E = 0
+    P = 0
+
     do i = 1, nt
         call dt_evolve_bloch(rt, gs, dt, Ac_ext(:, i-1), Ac_ext(:, i))
         call current(jcur, qtot, rt, gs, Ac_ext(:, i))
-        write(*, "(f12.6,99es25.15e4)") i*dt, Ac_ext(:, i), jcur(:), qtot, calc_total(rt, gs)
+        E(:) = - (Ac(:, i) - Ac(:, i-1)) / dt
+        P(:) = P(:) - jcur(:) * dt
+        ! write(*, "(f12.6,99es25.15e4)") i*dt, Ac_ext(:, i), jcur(:), qtot, calc_total(rt, gs)
+        write(*, "(f12.6,99es25.15e4)") i*dt, E, P, qtot
     end do
     stop "Good bye"
     ! if (0.0d0 < al(1)) al_vec1(1:3) = (/ al(1), 0.0d0, 0.0d0 /)
