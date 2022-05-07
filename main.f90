@@ -28,7 +28,7 @@ program main
 
     real(8), allocatable :: Ac_ext(:, :)
     integer :: ik, ib
-    real(8) :: egap
+    real(8) :: egap, qtot
 
     call read_input()
 
