@@ -24,6 +24,7 @@ program main
     real(8) :: jcur(3), qtot
 
     real(8), allocatable :: Ac_ext(:, :)
+    integer :: ik, ib
 
     call read_input()
 
@@ -32,7 +33,24 @@ program main
 
     write(*, "(a)") "# CALL: init_bloch"; flush(0)
 
+    gs%occup(1:16, :) = 2.0d0
+    gs%occup(17:, :) = 0.0d0
+
     call init_bloch(rt, gs)
+
+    ! qtot = 1d9
+    ! do ik=1,rt%nk
+    !     ! qtot = 0.0
+    !     do ib=1, rt%nstate
+    !     ! write(*,"(2i3,99es25.15e4)") ik, ib, gs%eigen(ib, ik), rt%rho(ib, ib, ik)
+    !         ! qtot = qtot + rt%rho(ib, ib, ik)
+    !     end do
+    !     ! write(*,"(i3,99es25.15e4)") ik, qtot
+    !     if (qtot > (gs%eigen(17, ik)-gs%eigen(16, ik))) then
+    !         qtot = gs%eigen(17, ik)-gs%eigen(16, ik)
+    !     end if
+    ! end do
+    !     write(*, *) "qtot", qtot
 
     allocate(Ac_ext(3, 0:nt))
 

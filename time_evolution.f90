@@ -102,7 +102,7 @@ subroutine current(jcur, qtot, rt, gs, Ac)
         end do
     end do
     !$omp end parallel do
-    jcur(:) = jcur(:) + Ac(:) * qtot / gs%volume
+    jcur(:) = jcur(:) + Ac(:) / gs%volume * qtot
     return
 end subroutine
     
