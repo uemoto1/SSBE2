@@ -1,0 +1,7 @@
+FC=ifort
+FLAGS=-O3 -qopenmp -march=core-avx2
+LIBS=
+
+
+
+
