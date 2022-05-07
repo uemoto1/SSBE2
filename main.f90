@@ -25,6 +25,7 @@ program main
 
     real(8), allocatable :: Ac_ext(:, :)
     integer :: ik, ib
+    real(8) :: egap
 
     call read_input()
 
@@ -38,6 +39,17 @@ program main
 
     call init_bloch(rt, gs)
 
+    egap = 1d99
+    do ik = 1, rt%nk
+        do ib = 1, rt%nstate-1
+            if ((gs%occup(ib, ik) >= 1) .and. (gs%occup(ib+1, ik) <= 1)) then
+                if ((gs%eigen(ib+1, ik)-gs%eigen(ib, ik)) < egap) then
+                    egap = gs%eigen(ib+1, ik)-gs%eigen(ib, ik)
+                end if
+            end if
+        end do
+    end do
+    write(*, "(a,f6.3)") "# Direct energy gap", egap
     ! qtot = 1d9
     ! do ik=1,rt%nk
     !     ! qtot = 0.0
