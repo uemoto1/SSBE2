@@ -98,22 +98,18 @@ subroutine current(jcur, qtot, rt, gs, Ac)
 
     qtot = 0.0d0
     jcur(:) = 0.0d0
-    !$omp parallel do default(shared) private(ik,ib,jb) reduction(+:qtot,jcur) collapse(2)
+    !$omp parallel do default(shared) private(ik,ib,jb) reduction(+:qtot,jcur)
     do ik = 1, rt%nk
         do ib = 1, rt%nstate
             qtot = qtot + gs%kweight(ik) * real(rt%rho(ib, ib, ik))
             do jb = 1, rt%nstate
-                jcur(1) = jcur(1) + (gs%kweight(ik) / gs%volume) * real( &
-                    & gs%pmatrix(ib, jb, 1, ik) * rt%rho(jb, ib, ik))
-                jcur(2) = jcur(2) + (gs%kweight(ik) / gs%volume) * real( &
-                    & gs%pmatrix(ib, jb, 2, ik) * rt%rho(jb, ib, ik))
-                jcur(3) = jcur(3) + (gs%kweight(ik) / gs%volume) * real( &
-                    & gs%pmatrix(ib, jb, 3, ik) * rt%rho(jb, ib, ik))
+                jcur(:) = jcur(:) + (gs%kweight(ik) / gs%volume) * real( &
+                    & gs%pmatrix(ib, jb, :, ik) * rt%rho(jb, ib, ik))
             end do
         end do
     end do
     !$omp end parallel do
-    jcur(:) = jcur(:) + Ac(:) / gs%volume * qtot
+    jcur(:) = jcur(:) + Ac(:) * (qtot / gs%volume)
     return
 end subroutine current
     

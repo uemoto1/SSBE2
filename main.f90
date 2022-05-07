@@ -27,7 +27,7 @@ program main
     real(8) :: E(3), P(3)
 
     real(8), allocatable :: Ac_ext(:, :)
-    integer :: ik, ib
+    integer :: ik, ib, jb
     real(8) :: egap, qtot
 
     call read_input()
@@ -53,18 +53,16 @@ program main
         end do
     end do
     write(*, "(a,f6.3)") "# Direct energy gap", egap
-    ! qtot = 1d9
-    ! do ik=1,rt%nk
-    !     ! qtot = 0.0
-    !     do ib=1, rt%nstate
-    !     ! write(*,"(2i3,99es25.15e4)") ik, ib, gs%eigen(ib, ik), rt%rho(ib, ib, ik)
-    !         ! qtot = qtot + rt%rho(ib, ib, ik)
-    !     end do
-    !     ! write(*,"(i3,99es25.15e4)") ik, qtot
-    !     if (qtot > (gs%eigen(17, ik)-gs%eigen(16, ik))) then
-    !         qtot = gs%eigen(17, ik)-gs%eigen(16, ik)
-    !     end if
-    ! end do
+    do ik=1,1
+        do ib=1, rt%nstate
+            gs%pmatrix(ib, ib, :, :) = 0.0d0
+            do jb=1, rt%nstate
+                write(*,"(3i3,99es25.15e4)") ik, ib, jb, &
+                    real(gs%pmatrix(ib, jb, 1, ik)), aimag(gs%pmatrix(ib, jb, 1, ik)), &
+                    real(gs%pmatrix(jb, ib, 1, ik)), aimag(gs%pmatrix(jb, ib, 1, ik))
+            end do
+        end do
+    end do
     !     write(*, *) "qtot", qtot
 
     allocate(Ac_ext(3, 0:nt))
