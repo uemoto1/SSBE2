@@ -5,7 +5,6 @@ module time_evolution
     type :: rt_data
         integer :: nk
         integer :: nstate
-        real(8) :: dt
         complex(8), allocatable :: rho(:, :, :)
     end type
 
@@ -39,23 +38,30 @@ subroutine dt_evolve_bloch(rt, gs, dt, Ac0, Ac1)
     complex(8) :: drho3_k(rt%nstate, rt%nstate)
     complex(8) :: drho4_k(rt%nstate, rt%nstate)
     integer :: ik
+    real(8) :: Ac_mid(3)
+
+    Ac_mid = (Ac0 + Ac1) * 0.5d0
 
     !$omp parallel do default(shared) private(ik,rho_k_tmp,drho1_k,drho2_k,drho3_k,drho4_k)
     do ik = 1, rt%nk
         ! 4th-order Runge-Kutta method
         drho1_k = calc_drho_k(rt%nstate, rt%rho(:, :, ik), &
             & gs%omega(:, :, ik), gs%pmatrix(:, :, :, ik), Ac0)
+
         rho_k_tmp = rt%rho(:, :, ik) + 0.5 * dt * drho1_k
         drho2_k = calc_drho_k(rt%nstate, rho_k_tmp, &
-            & gs%omega(:, :, ik), gs%pmatrix(:, :, :, ik), 0.5*(Ac0+Ac1))
+            & gs%omega(:, :, ik), gs%pmatrix(:, :, :, ik), Ac_mid)
+
         rho_k_tmp = rt%rho(:, :, ik) + 0.5 * dt * drho2_k
         drho3_k = calc_drho_k(rt%nstate, rho_k_tmp, &
-            & gs%omega(:, :, ik), gs%pmatrix(:, :, :, ik), 0.5*(Ac0+Ac1))
+            & gs%omega(:, :, ik), gs%pmatrix(:, :, :, ik), Ac_mid)
+
         rho_k_tmp = rt%rho(:, :, ik) + dt * drho3_k
         drho4_k = calc_drho_k(rt%nstate, rho_k_tmp, &
             & gs%omega(:, :, ik), gs%pmatrix(:, :, :, ik), Ac1)
+
         rt%rho(:, :, ik) = rt%rho(:, :, ik) &
-            & + (dt/6) * (drho1_k(:, :) + 2*drho2_k(:, :) + 2*drho3_k(:, :) + drho4_k(:, :))
+            & + (dt/6) * (drho1_k + 2*drho2_k + 2*drho3_k + drho4_k)
     end do
     !$omp end parallel do
 
@@ -70,6 +76,7 @@ function calc_drho_k(nstate, rho_k, omega_k, p_k, Ac) result(drho_k)
     real(8), intent(in) :: Ac(3)
 
     complex(8) :: drho_k(nstate, nstate)
+
     integer :: i
 
     drho_k(:, :) = dcmplx(0.0, -1.0) * omega_k(:, :) * rho_k(:, :)
@@ -89,22 +96,26 @@ subroutine current(jcur, qtot, rt, gs, Ac)
     real(8), intent(in) :: Ac(3)
     integer :: ik, ib, jb
 
-    jcur(:) = 0.0d0
     qtot = 0.0d0
+    jcur(:) = 0.0d0
     !$omp parallel do default(shared) private(ik,ib,jb) reduction(+:qtot,jcur) collapse(2)
     do ik = 1, rt%nk
         do ib = 1, rt%nstate
             qtot = qtot + gs%kweight(ik) * real(rt%rho(ib, ib, ik))
             do jb = 1, rt%nstate
-                jcur(:) = jcur(:) + (gs%kweight(ik) / gs%volume) * real( &
-                    & gs%pmatrix(ib, jb, :, ik) * rt%rho(jb, ib, ik))
+                jcur(1) = jcur(1) + (gs%kweight(ik) / gs%volume) * real( &
+                    & gs%pmatrix(ib, jb, 1, ik) * rt%rho(jb, ib, ik))
+                jcur(2) = jcur(2) + (gs%kweight(ik) / gs%volume) * real( &
+                    & gs%pmatrix(ib, jb, 2, ik) * rt%rho(jb, ib, ik))
+                jcur(3) = jcur(3) + (gs%kweight(ik) / gs%volume) * real( &
+                    & gs%pmatrix(ib, jb, 3, ik) * rt%rho(jb, ib, ik))
             end do
         end do
     end do
     !$omp end parallel do
     jcur(:) = jcur(:) + Ac(:) / gs%volume * qtot
     return
-end subroutine
+end subroutine current
     
 
 real(8) function calc_total(rt, gs)
