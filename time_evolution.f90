@@ -43,16 +43,16 @@ subroutine dt_evolve_bloch(rt, gs, dt, Ac0, Ac1)
     !$omp parallel do default(shared) private(ik,rho_k_tmp,drho1_k,drho2_k,drho3_k,drho4_k)
     do ik = 1, rt%nk
         ! 4th-order Runge-Kutta method
-        call calc_drho_k(rt%nstate, drho1_k, rt%rho(:, :, ik), &
+        drho1_k = calc_drho_k(rt%nstate, rt%rho(:, :, ik), &
             & gs%omega(:, :, ik), gs%pmatrix(:, :, :, ik), Ac0)
         rho_k_tmp = rt%rho(:, :, ik) + 0.5 * dt * drho1_k
-        call calc_drho_k(rt%nstate, drho2_k, rho_k_tmp, &
+        drho2_k = calc_drho_k(rt%nstate, rho_k_tmp, &
             & gs%omega(:, :, ik), gs%pmatrix(:, :, :, ik), 0.5*(Ac0+Ac1))
         rho_k_tmp = rt%rho(:, :, ik) + 0.5 * dt * drho2_k
-        call calc_drho_k(rt%nstate, drho3_k, rho_k_tmp, &
+        drho3_k = calc_drho_k(rt%nstate, rho_k_tmp, &
             & gs%omega(:, :, ik), gs%pmatrix(:, :, :, ik), 0.5*(Ac0+Ac1))
         rho_k_tmp = rt%rho(:, :, ik) + dt * drho3_k
-        call calc_drho_k(rt%nstate, drho4_k, rho_k_tmp, &
+        drho4_k = calc_drho_k(rt%nstate, rho_k_tmp, &
             & gs%omega(:, :, ik), gs%pmatrix(:, :, :, ik), Ac1)
         rt%rho(:, :, ik) = rt%rho(:, :, ik) &
             & + (dt/6) * (drho1_k(:, :) + 2*drho2_k(:, :) + 2*drho3_k(:, :) + drho4_k(:, :))
@@ -61,14 +61,15 @@ subroutine dt_evolve_bloch(rt, gs, dt, Ac0, Ac1)
 
 contains
 
-subroutine calc_drho_k(nstate, drho_k, rho_k, omega_k, p_k, Ac)
+function calc_drho_k(nstate, rho_k, omega_k, p_k, Ac) result(drho_k)
     implicit none
     integer, intent(in) :: nstate
-    complex(8), intent(out) :: drho_k(nstate, nstate)
     complex(8), intent(in) :: rho_k(nstate, nstate)
     real(8), intent(in) :: omega_k(nstate, nstate)
     complex(8), intent(in) :: p_k(nstate, nstate, 3)
     real(8), intent(in) :: Ac(3)
+
+    complex(8) :: drho_k(nstate, nstate)
     integer :: i
 
     drho_k(:, :) = dcmplx(0.0, -1.0) * omega_k(:, :) * rho_k(:, :)
@@ -76,7 +77,7 @@ subroutine calc_drho_k(nstate, drho_k, rho_k, omega_k, p_k, Ac)
         drho_k(:, :) = drho_k(:, :) + dcmplx(0.0, -Ac(i)) * ( &
             & matmul(p_k(:, :, i), rho_k(:, :)) - matmul(rho_k(:, :), p_k(:, :, i)))
     end do
-end subroutine calc_drho_k
+end function calc_drho_k
 end subroutine dt_evolve_bloch
 
 subroutine current(jcur, qtot, rt, gs, Ac)

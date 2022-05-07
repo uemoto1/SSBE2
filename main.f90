@@ -32,9 +32,6 @@ program main
 
     write(*, "(a)") "# CALL: init_bloch"; flush(0)
 
-    gs%occup(1:16, :) = 2.0d0
-    gs%occup(17:, :) = 0.0d0
-
     call init_bloch(rt, gs)
 
     allocate(Ac_ext(3, 0:nt))
