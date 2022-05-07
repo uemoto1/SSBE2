@@ -78,7 +78,7 @@ program main
     do i = 1, nt
         call dt_evolve_bloch(rt, gs, dt, Ac_ext(:, i-1), Ac_ext(:, i))
         call current(jcur, qtot, rt, gs, Ac_ext(:, i))
-        E(:) = - (Ac(:, i) - Ac(:, i-1)) / dt
+        E(:) = - (Ac_ext(:, i) - Ac_ext(:, i-1)) / dt
         P(:) = P(:) - jcur(:) * dt
         ! write(*, "(f12.6,99es25.15e4)") i*dt, Ac_ext(:, i), jcur(:), qtot, calc_total(rt, gs)
         write(*, "(f12.6,99es25.15e4)") i*dt, E, P, qtot
