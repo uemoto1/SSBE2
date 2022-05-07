@@ -19,6 +19,7 @@ subroutine init_bloch(rt, gs)
     rt%nk = gs%nk
     rt%nstate = gs%nstate
     allocate(rt%rho(rt%nstate, rt%nstate, rt%nk))
+    rt%rho(:, :, :) = 0.0d0
     do ik = 1, rt%nk
         do ib = 1, rt%nstate
             rt%rho(ib, ib, ik) = gs%occup(ib, ik)
