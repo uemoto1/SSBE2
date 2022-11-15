@@ -65,7 +65,7 @@ program main
     open(unit=102, file=trim(base_directory)//trim(sysname)//"_sbe_nex.data")
     write(102, '(a)') "# 1:Time[a.u.] 2:nelec[a.u.] 3:nhole[a.u.]"
 
-    energy0 = calc_energy(sbe, gs, Ac_ext_t(:, 0))
+    energy0 = calc_energy(sbe, gs, Ac_ext_t(:, 0), MPI_COMM_WORLD)
     write(101, '(f12.6,2(es24.15e3))') 0.0d0, energy0, 0.0d0
 
     do it = 1, nt
@@ -74,14 +74,14 @@ program main
         
         if (mod(it, 10) == 0) then
             E(:) = (Ac_ext_t(:, it + 1) - Ac_ext_t(:, it - 1)) / (2 * dt)
-            call calc_current_bloch(sbe, gs, Ac_ext_t(:, it), Jmat)
+            call calc_current_bloch(sbe, gs, Ac_ext_t(:, it), Jmat, MPI_COMM_WORLD)
             write(100, '(f12.6,15(es24.15e3))') t, Ac_ext_t(:, it), E(:), Ac_ext_t(:, it), E(:), Jmat(:)
 
-            energy = calc_energy(sbe, gs, Ac_ext_t(:, it))
+            energy = calc_energy(sbe, gs, Ac_ext_t(:, it), MPI_COMM_WORLD)
             write(101, '(f12.6,2(es24.15e3))') t, energy, energy-energy0
 
-            tr_all = calc_trace(sbe, gs, nstate_sbe)
-            tr_vb = calc_trace(sbe, gs, nelec / 2)
+            tr_all = calc_trace(sbe, gs, nstate_sbe, MPI_COMM_WORLD)
+            tr_vb = calc_trace(sbe, gs, nelec / 2, MPI_COMM_WORLD)
             write(102, '(f12.6,2(es24.15e3))') t, tr_all - tr_vb, nelec - tr_vb 
             
             write(*, '(f12.6,es24.15e3)') t, tr_all
