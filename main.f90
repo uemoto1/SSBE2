@@ -1,4 +1,5 @@
 program main
+    use mpi
     use sbe_gs
     use sbe_solver
     use input_parameter
@@ -13,8 +14,15 @@ program main
     integer :: it
     real(8) :: energy0, energy
     real(8) :: tr_all, tr_vb
+    integer :: icomm, nproc, irank, ierr
 
-    call read_input()
+    icomm = MPI_COMM_WORLD
+    call MPI_INIT(ierr)
+    call MPI_COMM_SIZE(icomm, nproc, ierr)
+    call MPI_COMM_RANK(icomm, irank, ierr)
+    if (irank == 0) write(*, "(a,i6)") "# MPI initialized: nproc=", nproc
+
+    call read_input(MPI_COMM_WORLD)
 
     if (0.0d0 < al(1)) al_vec1(1:3) = (/ al(1), 0.0d0, 0.0d0 /)
     if (0.0d0 < al(2)) al_vec2(1:3) = (/ 0.0d0, al(2), 0.0d0 /)
@@ -25,7 +33,10 @@ program main
     call init_sbe_gs(gs, sysname, gs_directory, &
         & nkgrid, nstate, nelec, &
         & al_vec1, al_vec2, al_vec3, &
-        & (read_sbe_gs_bin .eq. 'y'))
+        & .false., MPI_COMM_WORLD)
+
+        
+    
 
     ! Calculate dielectric spectra and save as SYSNAME_dielec.data:
     if (trim(theory) == 'lr_dielec') then
@@ -82,7 +93,9 @@ program main
     close(101)
     close(102)
 
-    write(*, '(a)') "Bye!"
 
-    stop
+    call MPI_FINALIZE(ierr)
+    stop "Bye!"
+
+    
 end program 

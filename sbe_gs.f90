@@ -31,7 +31,8 @@ module sbe_gs
 contains
 
 
-subroutine init_sbe_gs(gs, sysname, gs_directory, nkgrid, nb, ne, a1, a2, a3, read_bin)
+subroutine init_sbe_gs(gs, sysname, gs_directory, nkgrid, nb, ne, a1, a2, a3, read_bin, icomm)
+    use mpi
     use salmon_file, only: open_filehandle, get_filehandle
     implicit none
     type(s_sbe_gs), intent(inout) :: gs
@@ -42,7 +43,10 @@ subroutine init_sbe_gs(gs, sysname, gs_directory, nkgrid, nb, ne, a1, a2, a3, re
     integer, intent(in) :: ne
     real(8), intent(in) :: a1(1:3), a2(1:3), a3(1:3)
     logical, intent(in) :: read_bin
-    integer :: nk
+    integer, intent(in) :: icomm 
+    integer :: nk, irank, ierr
+
+    call MPI_COMM_RANK(icomm, irank, ierr)
 
     nk = nkgrid(1) * nkgrid(2) * nkgrid(3)
 
@@ -64,28 +68,38 @@ subroutine init_sbe_gs(gs, sysname, gs_directory, nkgrid, nb, ne, a1, a2, a3, re
     allocate(gs%tm_p_matrix(1:nb, 1:nb, 1:3, 1:nk))
     allocate(gs%rvnl_matrix(1:nb, 1:nb, 1:3, 1:nk))
 
-    
-    if (read_bin) then
-        !Retrieve all data from binray
-        write(*,*) "# read_sbe_gs_bin"
-        call read_sbe_gs_bin()
-    else
-        !Retrieve eigenenergies from 'SYSNAME_eigen.data':
-        write(*,*) "# read_eigen_data"
-        call read_eigen_data()
-        !Retrieve k-points from 'SYSNAME_k.data':
-        write(*,*) "# read_k_data"
-        call read_k_data()
-        !Retrieve transition matrix from 'SYSNAME_tm.data':
-        write(*,*) "# read_tm_data"
-        call read_tm_data()
-        !Export all data from binray
-        write(*,*) "# save_sbe_gs_bin"
-        call save_sbe_gs_bin()
+    if (irank == 0) then
+        if (read_bin) then
+            !Retrieve all data from binray
+            write(*,*) "# read_sbe_gs_bin"
+            call read_sbe_gs_bin()
+        else
+            !Retrieve eigenenergies from 'SYSNAME_eigen.data':
+            write(*,*) "# read_eigen_data"
+            call read_eigen_data()
+            !Retrieve k-points from 'SYSNAME_k.data':
+            write(*,*) "# read_k_data"
+            call read_k_data()
+            !Retrieve transition matrix from 'SYSNAME_tm.data':
+            write(*,*) "# read_tm_data"
+            call read_tm_data()
+            !Export all data from binray
+            write(*,*) "# save_sbe_gs_bin"
+            call save_sbe_gs_bin()
+        end if
     end if
-
+    call MPI_BCAST(gs%kpoint(1:3, 1:nk), 3*nk, MPI_REAL8, icomm, 0, ierr)
+    call MPI_BCAST(gs%kweight(1:nk), nk, MPI_REAL8, icomm, 0, ierr)
+    call MPI_BCAST(gs%eigen(1:nb, 1:nk), nb*nk, MPI_REAL8, icomm, 0, ierr)
+    call MPI_BCAST(gs%occup(1:nb, 1:nk), nb*nk, MPI_REAL8, icomm, 0, ierr)
+    call MPI_BCAST(gs%delta_omega(1:nb, 1:nb, 1:nk), nb*nb*nk, MPI_REAL8, icomm, 0, ierr)
+    call MPI_BCAST(gs%p_matrix(1:nb, 1:nb, 1:3, 1:nk), nb*nb*3*nk, MPI_COMPLEX8, icomm, 0, ierr)
+    call MPI_BCAST(gs%d_matrix(1:nb, 1:nb, 1:3, 1:nk), nb*nb*3*nk, MPI_COMPLEX8, icomm, 0, ierr)
+    call MPI_BCAST(gs%tm_p_matrix(1:nb, 1:nb, 1:3, 1:nk), nb*nb*3*nk, MPI_COMPLEX8, icomm, 0, ierr)
+    call MPI_BCAST(gs%rvnl_matrix(1:nb, 1:nb, 1:3, 1:nk), nb*nb*3*nk, MPI_COMPLEX8, icomm, 0, ierr)
+    
     !Calculate omega and d_matrix (neglecting diagonal part):
-    write(*,*) "# prepare_matrix"
+    if (irank == 0) write(*,*) "# prepare_matrix"
     call prepare_matrix()
 
     !Initial Occupation Number
