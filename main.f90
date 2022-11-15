@@ -40,13 +40,13 @@ program main
 
     ! Calculate dielectric spectra and save as SYSNAME_dielec.data:
     if (trim(theory) == 'lr_dielec') then
-        call calc_dielec(sysname, base_directory, gs, nenergy, de, gamma)
+        if (irank == 0) call calc_dielec(sysname, base_directory, gs, nenergy, de, gamma)
         stop
     end if
 
 
     ! Initialization of SBE solver and density matrix:
-    call init_sbe(sbe, gs, nstate_sbe)
+    call init_sbe(sbe, gs, nstate_sbe, MPI_COMM_WORLD)
 
     ! Prepare external pulse
     allocate(Ac_ext_t(1:3, -1:nt+1))

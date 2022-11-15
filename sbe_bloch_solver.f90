@@ -2,6 +2,7 @@
 module sbe_solver
     use salmon_math, only: pi
     use sbe_gs
+    use mpi
     implicit none
 
 
@@ -9,6 +10,7 @@ module sbe_solver
     type s_sbe_bloch_solver
         !k-points for real-time SBE calculation
         integer :: nk, nb
+        integer :: ik_max, ik_min
         complex(8), allocatable :: rho(:, :, :)
     end type
 
@@ -18,20 +20,28 @@ contains
 
 
 
-subroutine init_sbe(sbe, gs, nb)
+subroutine init_sbe(sbe, gs, nb, icomm)
     implicit none
     type(s_sbe_bloch_solver), intent(inout) :: sbe
     type(s_sbe_gs), intent(in) :: gs
     integer, intent(in) :: nb
-    integer :: ik, ib
+    integer, intent(in) :: icomm
+    integer :: ik, ib, nk_perproc, irank, nproc, ierr
+
+    call MPI_COMM_SIZE(icomm, nproc, ierr)
+    call MPI_COMM_RANK(icomm, irank, ierr)
 
     sbe%nk = gs%nk
     sbe%nb = nb
 
-    allocate(sbe%rho(1:sbe%nb, 1:sbe%nb, 1:sbe%nk))
+    nk_perproc = (sbe%nk - 1) / nproc + 1
+    sbe%ik_min = irank * nk_perproc + 1
+    sbe%ik_max = min(sbe%ik_min + nk_perproc - 1, sbe%nk)
+
+    allocate(sbe%rho(1:sbe%nb, 1:sbe%nb, sbe%ik_min:sbe%ik_max))
     
     sbe%rho(:, :, :) = 0d0
-    do ik = 1, sbe%nk
+    do ik = sbe%ik_min, sbe%ik_max
         do ib = 1, sbe%nb
             sbe%rho(ib, ib, ik) = gs%occup(ib, ik)
         end do
