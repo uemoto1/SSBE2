@@ -63,7 +63,7 @@ subroutine calc_current_bloch(sbe, gs, Ac, jmat, icomm)
     jtmp(1:3) = 0d0
 
     !$omp parallel do default(shared) private(ik,ib,jb,idir) reduction(+:jtmp)
-    do ik=1, sbe%nk
+    do ik = sbe%ik_min, sbe%ik_max
         do idir = 1, 3
             do ib = 1, sbe%nb
                 do jb = 1, sbe%nb
@@ -75,7 +75,7 @@ subroutine calc_current_bloch(sbe, gs, Ac, jmat, icomm)
         end do
     end do
     !$omp end parallel do
-    call MPI_ALLREDUCE(MPI_IN_PLACE, jtmp, 3, MPI_REAL8, MPI_SUM, icomm, ierr)
+    call MPI_ALLREDUCE(MPI_IN_PLACE, jtmp, 3, MPI_DOUBLE_COMPLEX, MPI_SUM, icomm, ierr)
     
     jtmp(1:3) = jtmp(1:3) / sum(gs%kweight(:))
 
@@ -127,8 +127,8 @@ contains
     !Calculate [H, rho] commutation:
     subroutine calc_hrho_bloch(rho, hrho)
         implicit none
-        complex(8), intent(in)     :: rho(nb, nb, nk)
-        complex(8), intent(out)    :: hrho(nb, nb, nk)
+        complex(8), intent(in)     :: rho(nb, nb, sbe%ik_min:sbe%ik_max)
+        complex(8), intent(out)    :: hrho(nb, nb, sbe%ik_min:sbe%ik_max)
         integer :: ik, idir
         !$omp parallel do default(shared) private(ik,idir)
         do ik = sbe%ik_min, sbe%ik_max
@@ -174,7 +174,7 @@ function calc_trace(sbe, gs, nb_max, icomm) result(tr)
         end do
     end do
     !$omp end parallel do
-    call MPI_ALLREDUCE(MPI_IN_PLACE, tr_tmp, 1, MPI_REAL8, MPI_SUM, icomm, ierr)
+    call MPI_ALLREDUCE(MPI_IN_PLACE, tr_tmp, 1, MPI_DOUBLE_PRECISION, MPI_SUM, icomm, ierr)
     tr = tr_tmp / sum(gs%kweight)
     return
 end function calc_trace
@@ -212,7 +212,7 @@ function calc_energy(sbe, gs, Ac, icomm) result(energy)
         end do
     end do
     !$omp end parallel do
-    call MPI_ALLREDUCE(MPI_IN_PLACE, energy, 1, MPI_REAL8, MPI_SUM, icomm, ierr)
+    call MPI_ALLREDUCE(MPI_IN_PLACE, energy, 1, MPI_DOUBLE_PRECISION, MPI_SUM, icomm, ierr)
     energy = energy / sum(gs%kweight)
 
     return 
