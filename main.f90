@@ -16,7 +16,7 @@ program main
     real(8) :: energy0, energy
     real(8) :: tr_all, tr_vb
     integer :: nproc, irank, ierr
-    integer, allocatable :: nthread
+    integer :: nthread
 
     call MPI_INIT(ierr)
     call MPI_COMM_SIZE(MPI_COMM_WORLD, nproc, ierr)
