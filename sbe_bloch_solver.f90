@@ -135,10 +135,25 @@ contains
             hrho(1:nb, 1:nb, ik) = gs%delta_omega(1:nb, 1:nb, ik) * rho(1:nb, 1:nb, ik)
             !hrho = hrho + Ac(t) * (p * rho - rho * p)
             do idir=1, 3 !1:x, 2:y, 3:z
-                hrho(1:nb, 1:nb, ik) = hrho(1:nb, 1:nb, ik) + Ac(idir) * (&
-                & + matmul(gs%p_matrix(1:nb, 1:nb, idir, ik), rho(1:nb, 1:nb, ik)) &
-                & - matmul(rho(1:nb, 1:nb, ik), gs%p_matrix(1:nb, 1:nb, idir, ik)) &
-                & )
+                ! hrho(1:nb, 1:nb, ik) = hrho(1:nb, 1:nb, ik) + Ac(idir) * (&
+                ! & + matmul(gs%p_matrix(1:nb, 1:nb, idir, ik), rho(1:nb, 1:nb, ik)) &
+                ! & - matmul(rho(1:nb, 1:nb, ik), gs%p_matrix(1:nb, 1:nb, idir, ik)) &
+                ! & )
+
+
+                call ZGEMM("N","N", sbe%nb, sbe%nb, sbe%nb, &
+                    dcmplx(+Ac(idir), 0d0), &
+                    gs%p_matrix(:, :, idir, ik),sbe%nb, &
+                    rho(:, :, ik), sbe%nb, &
+                    dcmplx(1d0, 0d0),hrho(:, :, ik),sbe%nb)
+
+                call ZGEMM("N","N", sbe%nb, sbe%nb, sbe%nb, &
+                    dcmplx(-Ac(idir), 0d0), &
+                    rho(:, :, ik), sbe%nb, &
+                    gs%p_matrix(:, :, idir, ik),sbe%nb, &
+                    dcmplx(1d0, 0d0), hrho(:, :, ik), sbe%nb)
+                    
+
                 ! call ZHEMM('L', 'U', sbe%nb, sbe%nb, &
                 !     & dcmplx(+Ac(idir), 0d0), &
                 !     & gs%p_matrix(:, :, idir, ik), sbe%nb, &

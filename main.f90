@@ -1,5 +1,6 @@
 program main
     use mpi
+    use omp_lib
     use sbe_gs
     use sbe_solver
     use input_parameter
@@ -11,17 +12,30 @@ program main
     type(s_sbe_gs) :: gs
     real(8) :: t,  E(3), jmat(3)
     real(8), allocatable :: Ac_ext_t(:, :)
-    integer :: it
+    integer :: it, i
     real(8) :: energy0, energy
     real(8) :: tr_all, tr_vb
-    integer :: icomm, nproc, irank, ierr
+    integer :: nproc, irank, ierr
+    integer, allocatable :: nthread(:)
 
-    icomm = MPI_COMM_WORLD
     call MPI_INIT(ierr)
-    call MPI_COMM_SIZE(icomm, nproc, ierr)
-    call MPI_COMM_RANK(icomm, irank, ierr)
-    if (irank == 0) write(*, "(a,i6)") "# MPI initialized: nproc=", nproc
+    call MPI_COMM_SIZE(MPI_COMM_WORLD, nproc, ierr)
+    call MPI_COMM_RANK(MPI_COMM_WORLD, irank, ierr)
 
+    allocate(nthread(0:nproc-1))
+    !$omp parallel
+    nthread(0) = omp_get_num_threads()
+    !$omp end parallel
+    call MPI_ALLGATHER(nthread, 1, MPI_INTEGER, &
+        & nthread, 1, MPI_INTEGER, MPI_COMM_WORLD, ierr)
+
+    if (irank == 0) then
+        write(*, "(a,i6)") "# number of MPI process=", nproc
+        do i = 0, nproc - 1
+            write(*, "(a,i6,a,i6)") "#  rank=", i, " number of OMP thread=", nthread(i)
+        end do
+    end if
+    
     call read_input(MPI_COMM_WORLD)
 
     if (0.0d0 < al(1)) al_vec1(1:3) = (/ al(1), 0.0d0, 0.0d0 /)
