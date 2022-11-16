@@ -153,17 +153,6 @@ contains
                     gs%p_matrix(:, :, idir, ik),sbe%nb, &
                     dcmplx(1d0, 0d0), hrho(:, :, ik), sbe%nb)
                     
-
-                ! call ZHEMM('L', 'U', sbe%nb, sbe%nb, &
-                !     & dcmplx(+Ac(idir), 0d0), &
-                !     & gs%p_matrix(:, :, idir, ik), sbe%nb, &
-                !     & rho(:, :, ik), sbe%nb, &
-                !     & dcmplx(1d0, 0d0), hrho(:, :, ik), sbe%nb)
-                ! call ZHEMM('L', 'U', sbe%nb, sbe%nb, &
-                !     & dcmplx(-Ac(idir), 0d0), &
-                !     & rho(:, :, ik), sbe%nb, &
-                !     & gs%p_matrix(:, :, idir, ik), sbe%nb, &
-                !     & dcmplx(1d0, 0d0), hrho(:, :, ik), sbe%nb)
             end do !idir
         end do !ik
         !$omp end parallel do

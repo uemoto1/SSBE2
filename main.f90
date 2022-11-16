@@ -16,25 +16,24 @@ program main
     real(8) :: energy0, energy
     real(8) :: tr_all, tr_vb
     integer :: nproc, irank, ierr
-    integer, allocatable :: nthread(:)
+    integer, allocatable :: nthread
 
     call MPI_INIT(ierr)
     call MPI_COMM_SIZE(MPI_COMM_WORLD, nproc, ierr)
     call MPI_COMM_RANK(MPI_COMM_WORLD, irank, ierr)
 
-    allocate(nthread(0:nproc-1))
     !$omp parallel
-    nthread(0) = omp_get_num_threads()
+    !$omp master
+    nthread = omp_get_num_threads()
+    !$omp end master
     !$omp end parallel
-    call MPI_ALLGATHER(nthread, 1, MPI_INTEGER, &
-        & nthread, 1, MPI_INTEGER, MPI_COMM_WORLD, ierr)
 
     if (irank == 0) then
-        write(*, "(a,i6)") "# number of MPI process=", nproc
-        do i = 0, nproc - 1
-            write(*, "(a,i6,a,i6)") "#  rank=", i, " number of OMP thread=", nthread(i)
-        end do
+        write(*, "(a)") "# Parallelization:", nproc
+        write(*, "(a,i6)") "# number of MPI processes=", nproc
+        write(*, "(a,i6)") "# number of OMP threads=", nthread
     end if
+
     
     call read_input(MPI_COMM_WORLD)
 
