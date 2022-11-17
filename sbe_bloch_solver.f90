@@ -79,7 +79,7 @@ subroutine calc_current_bloch(sbe, gs, Ac, jmat, icomm)
     
     jtmp(1:3) = jtmp(1:3) / sum(gs%kweight(:))
 
-    jmat(:) = (real(jtmp(:)) + Ac * calc_trace(sbe, gs, sbe%nb, MPI_COMM_WORLD)) / gs%volume    
+    jmat(:) = (real(jtmp(:)) + Ac * calc_trace(sbe, gs, sbe%nb, icomm)) / gs%volume    
     !jmat(1:3) = (real(jtmp(1:3))) / gs%volume    
     return
 end subroutine calc_current_bloch
